@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kitchen Planner</title>
+<style>
+:root{
+  --bg:#faf8f4;--card:#fff;--border:#e8dfc8;--gold:#c2a16b;--dark:#2d2417;
+  --text:#2d2417;--muted:#888;--light:#f5f0e8;--red:#e07070;--green:#6ba16b;
+  --blue:#4a7fcb;--ice:#70a0d0;--brown:#b07030;
+  --cat-hf:#c2a16b;--cat-ch:#d4956a;--cat-bf:#a16b6b;--cat-fi:#6b9ea1;
+  --cat-vg:#6ba16b;--cat-ri:#9a8a5a;--cat-br:#b8956e;--cat-dr:#6b7ea1;--cat-ds:#a16b8d;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:Georgia,serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;}
+/* HEADER */
+#header{background:var(--dark);color:#f5e6c8;padding:12px 16px 10px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;}
+#header h1{font-size:18px;letter-spacing:.5px;}
+#header small{font-size:10px;opacity:.7;display:block;margin-top:2px;}
+.hdr-btn{background:none;border:1px solid #f5e6c8;color:#f5e6c8;border-radius:5px;padding:5px 10px;cursor:pointer;font-size:12px;font-family:Georgia,serif;}
+/* NAV */
+nav{display:flex;background:#fff;border-bottom:2px solid var(--border);overflow-x:auto;position:sticky;top:55px;z-index:40;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+nav button{flex:none;background:none;border:none;padding:9px 11px;font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:Georgia,serif;position:relative;}
+nav button.active{color:var(--dark);border-bottom:2px solid var(--gold);margin-bottom:-2px;font-weight:bold;}
+.badge{background:var(--gold);color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;margin-left:3px;vertical-align:middle;}
+/* ALERTS */
+.alerts{padding:6px 12px;display:flex;flex-direction:column;gap:5px;}
+.alert{padding:7px 10px;border-radius:6px;font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.alert-warn{background:#fff3cd;}.alert-red{background:#fde8e8;}
+.alert button{margin-left:auto;background:var(--dark);color:#fff;border:none;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;}
+/* SECTIONS */
+section{padding:12px 12px 70px;}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.section-header h2{font-size:16px;}
+.empty{color:var(--muted);font-style:italic;font-size:13px;text-align:center;padding:24px 0;}
+/* CARDS */
+.list{display:flex;flex-direction:column;gap:7px;}
+.card{background:var(--card);border-radius:8px;padding:10px 11px;display:flex;justify-content:space-between;align-items:flex-start;box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:4px solid var(--border);gap:7px;}
+.card-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.card-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.card .lbl{font-size:11px;color:var(--muted);}
+.card .dish{font-size:14px;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.card .notes{font-size:12px;color:var(--muted);}
+/* PORTIONS */
+.portion-row{display:flex;align-items:center;gap:4px;}
+.portion-btn{background:var(--light);border:none;border-radius:4px;width:24px;height:24px;cursor:pointer;font-size:16px;font-weight:bold;line-height:1;display:flex;align-items:center;justify-content:center;}
+.portion-count{font-size:15px;font-weight:bold;min-width:20px;text-align:center;}
+.portion-label{font-size:10px;color:var(--muted);}
+/* BUTTONS */
+.btn{border:none;border-radius:5px;padding:6px 11px;cursor:pointer;font-size:12px;font-family:Georgia,serif;display:inline-block;text-decoration:none;}
+.btn-gold{background:var(--gold);color:#fff;}.btn-dark{background:var(--dark);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}.btn-blue{background:var(--blue);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}.btn-ghost{background:#f0ebe2;color:var(--dark);}
+.btn-brown{background:var(--brown);color:#fff;}
+.btn-sm{padding:3px 8px;font-size:11px;}
+.btn-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0;line-height:1;}
+/* CATEGORY BADGES */
+.cat{display:inline-block;font-size:10px;color:#fff;border-radius:4px;padding:1px 6px;margin-right:3px;}
+.hf-badge{display:inline-block;font-size:10px;color:var(--gold);background:#fff8ec;border-radius:4px;padding:1px 6px;margin-right:3px;}
+.custom-badge{display:inline-block;font-size:10px;color:var(--blue);background:#e8f4ff;border-radius:4px;padding:1px 6px;margin-right:3px;}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:100;}
+.modal{background:#fff;border-radius:16px 16px 0 0;padding:18px 16px 24px;width:100%;max-height:92vh;overflow-y:auto;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.modal-header h3{font-size:16px;}
+.close-btn{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;padding:0;}
+label.field{display:block;font-size:12px;font-weight:bold;color:#666;margin-bottom:3px;margin-top:10px;}
+input[type=text],input[type=date],input[type=number],select,textarea{width:100%;padding:9px 10px;border:1px solid #ddd;border-radius:6px;font-size:15px;font-family:Georgia,serif;background:#fff;-webkit-appearance:none;}
+textarea{height:80px;resize:vertical;}
+.check-label{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-top:10px;}
+.submit-btn{width:100%;background:var(--dark);color:#fff;border:none;border-radius:6px;padding:12px;margin-top:14px;cursor:pointer;font-size:15px;font-family:Georgia,serif;}
+.row{display:flex;gap:8px;flex-wrap:wrap;}
+/* SEARCHABLE PICKER */
+.picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:200;}
+.picker-modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-height:85vh;display:flex;flex-direction:column;}
+.picker-header{padding:14px 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.picker-header h3{font-size:16px;margin-bottom:8px;}
+.picker-search{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:16px;font-family:Georgia,serif;background:#fff;-webkit-appearance:none;}
+.picker-list{flex:1;overflow-y:auto;padding:6px 0;}
+.picker-section-hdr{font-size:11px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 16px 4px;}
+.picker-item{padding:11px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f8f4ee;}
+.picker-item:active{background:var(--light);}
+.picker-item .pi-name{flex:1;font-weight:bold;}
+.picker-item .pi-meta{font-size:11px;color:var(--muted);}
+.picker-cancel{padding:14px;border-top:1px solid var(--border);flex-shrink:0;}
+.picker-cancel button{width:100%;background:#f0ebe2;border:none;border-radius:8px;padding:12px;font-size:15px;cursor:pointer;font-family:Georgia,serif;}
+/* SOURCE BUTTONS */
+.src-btns{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.src-btn{background:#f0ebe2;border:none;border-radius:5px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:Georgia,serif;}
+.src-btn.active{background:var(--dark);color:#fff;}
+/* PLAN TAB */
+.day-card{background:var(--card);border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.07);overflow:hidden;}
+.day-header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 8px;border-bottom:1px solid var(--border);}
+.day-header .day-label{font-size:13px;font-weight:bold;}
+.day-header .day-date{font-size:11px;color:var(--muted);}
+.day-header .day-today{font-size:10px;background:var(--gold);color:#fff;border-radius:4px;padding:1px 6px;margin-left:6px;}
+.day-body{padding:10px 12px;}
+.day-slot{display:flex;align-items:center;gap:8px;min-height:36px;}
+.day-slot .slot-dish{flex:1;font-size:14px;font-weight:bold;}
+.day-slot .slot-meta{font-size:11px;color:var(--muted);}
+.day-slot .slot-type{font-size:11px;color:var(--muted);white-space:nowrap;}
+.day-empty{font-size:13px;color:var(--muted);font-style:italic;}
+.day-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+/* COOK TAB */
+.cook-day{background:var(--card);border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+.cook-day-header{padding:10px 12px 8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.cook-day-body{padding:10px 12px;}
+.cook-slot{display:flex;align-items:flex-start;gap:8px;}
+.cook-slot .cs-info{flex:1;}
+.cook-slot .cs-dish{font-size:14px;font-weight:bold;margin-bottom:2px;}
+.cook-slot .cs-meta{font-size:12px;color:var(--muted);}
+.cook-slot .cs-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.status-cooked{opacity:.6;}
+.status-badge{font-size:10px;border-radius:4px;padding:1px 6px;}
+.status-planned{background:#e8f4ff;color:var(--blue);}
+.status-done{background:#e8f8e8;color:var(--green);}
+/* SHOPPING */
+.shop-section{margin-bottom:14px;}
+.shop-section h3{font-size:13px;color:var(--dark);margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.shop-item{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid #f5f0e8;font-size:14px;}
+.shop-item:last-child{border-bottom:none;}
+.shop-item input[type=checkbox]{width:18px;height:18px;cursor:pointer;flex-shrink:0;accent-color:var(--green);}
+.shop-item.checked label{text-decoration:line-through;color:var(--muted);}
+.shop-item label{flex:1;cursor:pointer;}
+.pantry-toggle{background:none;border:none;color:var(--blue);font-size:12px;cursor:pointer;padding:4px 0;font-family:Georgia,serif;}
+.pantry-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:var(--muted);}
+.pantry-item input[type=checkbox]{width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--red);}
+.pantry-item.need label{color:var(--red);font-weight:bold;}
+/* SUGGESTIONS */
+.sugg-box{background:var(--card);border-radius:8px;padding:11px;margin-bottom:11px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.sugg-box h3{font-size:14px;margin-bottom:7px;}
+.sugg-item{font-size:13px;margin-bottom:4px;}
+.sugg-card{background:var(--bg);border-radius:6px;padding:8px 10px;margin-bottom:7px;}
+/* DIARY */
+.diary-group{margin-bottom:14px;}
+.diary-date-hdr{font-size:11px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+/* RECIPE BROWSER */
+.filter-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.filter-btn{background:#f0ebe2;border:none;border-radius:4px;padding:4px 9px;font-size:11px;cursor:pointer;font-family:Georgia,serif;}
+.filter-btn.active{background:var(--gold);color:#fff;}
+.recipe-list{max-height:55vh;overflow-y:auto;}
+/* DATA */
+.data-box{background:var(--card);border-radius:8px;padding:13px;margin-bottom:11px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.data-box h3{font-size:14px;margin-bottom:7px;}
+.data-box p{font-size:13px;color:var(--muted);margin-bottom:9px;line-height:1.5;}
+/* MISC */
+.active-src{background:var(--dark)!important;color:#fff!important;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div><h1>🍽 Kitchen Planner</h1><small id="today-date"></small></div>
+    <button class="hdr-btn" onclick="openTab('recipes')">📖 Recipes</button>
+  </div>
+  <nav id="main-nav">
+    <button onclick="openTab('plan')" class="active">📅 Plan</button>
+    <button onclick="openTab('cook')">🍳 Cook</button>
+    <button onclick="openTab('shop')">🛒 Shopping</button>
+    <button onclick="openTab('fridge')">🥡 Fridge <span class="badge" id="fridge-badge" style="display:none"></span></button>
+    <button onclick="openTab('freezer')">❄️ Freezer <span class="badge" id="freezer-badge" style="display:none"></span></button>
+    <button onclick="openTab('diary')">🍽 Diary</button>
+    <button onclick="openTab('ideas')">✨ Ideas</button>
+    <button onclick="openTab('recipes')">📖 Recipes</button>
+    <button onclick="openTab('data')">⚙️ Data</button>
+  </nav>
+  <div id="alerts-area"></div>
+
+  <!-- PLAN TAB -->
+  <section id="tab-plan" class="tab-section">
+    <div class="section-header">
+      <h2>Meal Plan</h2>
+      <div class="row">
+        <button class="btn btn-ghost" onclick="shiftPlanStart(-1)">← Back</button>
+        <button class="btn btn-ghost" onclick="shiftPlanStart(1)">Forward →</button>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Assign each day — then generate your shopping list below.</p>
+    <div id="plan-days"></div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-blue" style="flex:1" onclick="openTab('shop')">🛒 Generate Shopping List →</button>
+      <button class="btn btn-ghost" onclick="clearPlan()">Clear plan</button>
+    </div>
+  </section>
+
+  <!-- COOK TAB -->
+  <section id="tab-cook" class="tab-section" style="display:none">
+    <div class="section-header"><h2>Cooking Schedule</h2></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Your plan — mark dishes as cooked when done. Shift days if needed.</p>
+    <div id="cook-days"></div>
+  </section>
+
+  <!-- SHOPPING TAB -->
+  <section id="tab-shop" class="tab-section" style="display:none">
+    <div class="section-header">
+      <h2>Shopping List</h2>
+      <div class="row">
+        <button class="btn btn-ghost" onclick="regenerateShopping()">↺ Regen</button>
+        <button class="btn btn-blue" onclick="copyShoppingList()">📋 Copy</button>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px" id="shop-based-on"></p>
+    <div id="shop-content"><p class="empty">Assign meals in the Plan tab first.</p></div>
+  </section>
+
+  <!-- FRIDGE TAB -->
+  <section id="tab-fridge" class="tab-section" style="display:none">
+    <div class="section-header"><h2>In the Fridge</h2><button class="btn btn-gold" onclick="openModal('modal-leftover')">+ Add</button></div>
+    <div class="list" id="fridge-list"><p class="empty">No leftovers tracked.</p></div>
+  </section>
+
+  <!-- FREEZER TAB -->
+  <section id="tab-freezer" class="tab-section" style="display:none">
+    <div class="section-header"><h2>Freezer</h2><button class="btn btn-gold" onclick="openModal('modal-freezer')">+ Add</button></div>
+    <div class="list" id="freezer-list"><p class="empty">Freezer is empty.</p></div>
+  </section>
+
+  <!-- DIARY TAB -->
+  <section id="tab-diary" class="tab-section" style="display:none">
+    <div class="section-header"><h2>Dinner Diary</h2><button class="btn btn-gold" onclick="openModal('modal-dinner')">+ Add</button></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">What you and Nameer actually ate — last 30 days.</p>
+    <div id="diary-list"><p class="empty">No dinners recorded yet.</p></div>
+  </section>
+
+  <!-- IDEAS TAB -->
+  <section id="tab-ideas" class="tab-section" style="display:none">
+    <h2 style="margin-bottom:4px">What to Cook Next</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Avoids freezer duplicates &amp; recent repeats. Varied categories.</p>
+    <div id="ideas-content"></div>
+  </section>
+
+  <!-- RECIPES TAB -->
+  <section id="tab-recipes" class="tab-section" style="display:none">
+    <div class="section-header">
+      <h2>Recipes <span style="font-size:13px;color:var(--muted)" id="recipe-count"></span></h2>
+      <button class="btn btn-gold" onclick="openModal('modal-add-recipe')">+ New</button>
+    </div>
+    <input type="text" id="recipe-search" placeholder="Search recipes…" oninput="renderRecipes()" style="margin-bottom:10px">
+    <div class="filter-row" id="cat-filters"></div>
+    <div class="recipe-list" id="recipe-list-items"></div>
+  </section>
+
+  <!-- DATA TAB -->
+  <section id="tab-data" class="tab-section" style="display:none">
+    <h2 style="margin-bottom:12px">Data &amp; Backup</h2>
+    <div class="data-box"><h3>💾 Export backup</h3><p>Downloads a JSON file of all your data. Save to Google Drive as a backup.</p><button class="btn btn-dark" onclick="exportData()">Download backup</button></div>
+    <div class="data-box"><h3>📂 Import / Restore</h3><p>Restore from a backup file. This will <strong>replace</strong> all current data.</p><input type="file" id="import-file" accept=".json" onchange="importData(event)" style="font-size:13px"></div>
+    <div class="data-box"><h3>🗑 Clear tracking data</h3><p>Wipes the plan, fridge, freezer, diary. Custom recipes are kept.</p><button class="btn btn-red" onclick="clearData()">Clear tracking data</button></div>
+    <div class="data-box"><h3>ℹ️ About</h3><p>Data stored in Safari's localStorage on this device. Recipe list last synced from Google Drive: <strong>May 25 2026</strong>. To update, ask Claude: "refresh my recipes".</p></div>
+  </section>
+</div>
+
+<!-- ═══ MODALS ═══════════════════════════════════════════════════════════ -->
+
+<!-- ADD TO FRIDGE -->
+<div class="overlay" id="modal-leftover" style="display:none" onclick="closeModalOutside(event,'modal-leftover')">
+  <div class="modal"><div class="modal-header"><h3>Add to fridge</h3><button class="close-btn" onclick="closeModal('modal-leftover')">✕</button></div>
+    <label class="field">Dish</label>
+    <button class="btn btn-ghost" style="width:100%;text-align:left;margin-top:4px" onclick="openPicker('leftover-dish','any')">
+      <span id="leftover-dish-display">Tap to pick a dish…</span>
+    </button>
+    <input type="hidden" id="leftover-dish">
+    <label class="field">Date made</label><input type="date" id="lo-date">
+    <label class="field">Servings remaining</label><input type="number" id="lo-servings" value="2" min="1">
+    <label class="field">Notes</label><input type="text" id="lo-notes">
+    <button class="submit-btn" onclick="saveLeftover()">Save</button>
+  </div>
+</div>
+
+<!-- ADD TO FREEZER -->
+<div class="overlay" id="modal-freezer" style="display:none" onclick="closeModalOutside(event,'modal-freezer')">
+  <div class="modal"><div class="modal-header"><h3>Add to freezer</h3><button class="close-btn" onclick="closeModal('modal-freezer')">✕</button></div>
+    <label class="field">Dish</label>
+    <button class="btn btn-ghost" style="width:100%;text-align:left;margin-top:4px" onclick="openPicker('freezer-dish','any')">
+      <span id="freezer-dish-display">Tap to pick a dish…</span>
+    </button>
+    <input type="hidden" id="freezer-dish">
+    <label class="field">Date frozen</label><input type="date" id="fz-date">
+    <label class="field">Single-serve portions</label><input type="number" id="fz-portions" value="6" min="1">
+    <label class="field">Notes</label><input type="text" id="fz-notes">
+    <button class="submit-btn" onclick="saveFreezer()">Save</button>
+  </div>
+</div>
+
+<!-- LOG DINNER -->
+<div class="overlay" id="modal-dinner" style="display:none" onclick="closeModalOutside(event,'modal-dinner')">
+  <div class="modal"><div class="modal-header"><h3>Log a dinner</h3><button class="close-btn" onclick="closeModal('modal-dinner')">✕</button></div>
+    <label class="field">Date</label><input type="date" id="din-date">
+    <label class="field">What you ate</label>
+    <button class="btn btn-ghost" style="width:100%;text-align:left;margin-top:4px" onclick="openPicker('dinner-dish','freetext')">
+      <span id="dinner-dish-display">Tap to pick or type…</span>
+    </button>
+    <input type="hidden" id="dinner-dish">
+    <label class="field">Source</label>
+    <div class="src-btns" id="din-src-btns">
+      <button class="src-btn active" data-src="cooked" onclick="setSrc(this,'din-source')">🍳 Cooked</button>
+      <button class="src-btn" data-src="fridge" onclick="setSrc(this,'din-source')">🥡 Fridge</button>
+      <button class="src-btn" data-src="freezer" onclick="setSrc(this,'din-source')">❄️ Freezer</button>
+      <button class="src-btn" data-src="out" onclick="setSrc(this,'din-source')">🍽 Ate out</button>
+      <button class="src-btn" data-src="ordered" onclick="setSrc(this,'din-source')">📦 Ordered in</button>
+    </div>
+    <input type="hidden" id="din-source" value="cooked">
+    <label class="field">Notes (optional)</label><input type="text" id="din-notes">
+    <button class="submit-btn" onclick="saveDinner()">Save</button>
+  </div>
+</div>
+
+<!-- ASSIGN DAY (Plan tab) -->
+<div class="overlay" id="modal-assign" style="display:none" onclick="closeModalOutside(event,'modal-assign')">
+  <div class="modal"><div class="modal-header"><h3 id="assign-title">Assign day</h3><button class="close-btn" onclick="closeModal('modal-assign')">✕</button></div>
+    <input type="hidden" id="assign-date">
+    <label class="field">Type</label>
+    <div class="src-btns" id="assign-type-btns">
+      <button class="src-btn active" data-src="cook" onclick="setSrc(this,'assign-type');showAssignFields()">🍳 Cook fresh</button>
+      <button class="src-btn" data-src="fridge" onclick="setSrc(this,'assign-type');showAssignFields()">🥡 From fridge</button>
+      <button class="src-btn" data-src="freezer" onclick="setSrc(this,'assign-type');showAssignFields()">❄️ From freezer</button>
+      <button class="src-btn" data-src="out" onclick="setSrc(this,'assign-type');showAssignFields()">🍽 Eating out</button>
+    </div>
+    <input type="hidden" id="assign-type" value="cook">
+    <div id="assign-dish-row">
+      <label class="field">Dish</label>
+      <button class="btn btn-ghost" style="width:100%;text-align:left;margin-top:4px" id="assign-dish-btn" onclick="openAssignPicker()">
+        <span id="assign-dish-display">Tap to pick…</span>
+      </button>
+      <input type="hidden" id="assign-dish">
+    </div>
+    <div id="assign-out-row" style="display:none">
+      <label class="field">Note (optional)</label>
+      <input type="text" id="assign-out-note" placeholder="e.g. Persian restaurant, Nameer's work dinner">
+    </div>
+    <label class="field">Notes (optional)</label>
+    <input type="text" id="assign-notes" placeholder="">
+    <button class="submit-btn" onclick="saveAssign()">Assign</button>
+  </div>
+</div>
+
+<!-- MARK COOKED (Cook tab) -->
+<div class="overlay" id="modal-mark-cooked" style="display:none" onclick="closeModalOutside(event,'modal-mark-cooked')">
+  <div class="modal"><div class="modal-header"><h3>Mark as cooked</h3><button class="close-btn" onclick="closeModal('modal-mark-cooked')">✕</button></div>
+    <input type="hidden" id="mc-date">
+    <p id="mc-dish-label" style="font-size:15px;font-weight:bold;margin:10px 0"></p>
+    <label class="field">Servings cooked</label><input type="number" id="mc-servings" value="4" min="1">
+    <div class="check-label"><input type="checkbox" id="mc-to-fridge" checked><label for="mc-to-fridge">Add leftovers to fridge</label></div>
+    <div class="check-label"><input type="checkbox" id="mc-to-freezer"><label for="mc-to-freezer">Also add portions to freezer</label></div>
+    <div id="mc-freeze-row" style="display:none">
+      <label class="field">Portions to freeze</label><input type="number" id="mc-freeze-portions" value="4" min="1">
+    </div>
+    <label class="field">Notes (optional)</label><input type="text" id="mc-notes">
+    <button class="submit-btn" onclick="saveMarkCooked()">Mark as cooked</button>
+  </div>
+</div>
+
+<!-- ADD CUSTOM RECIPE -->
+<div class="overlay" id="modal-add-recipe" style="display:none" onclick="closeModalOutside(event,'modal-add-recipe')">
+  <div class="modal"><div class="modal-header"><h3>Add custom recipe</h3><button class="close-btn" onclick="closeModal('modal-add-recipe')">✕</button></div>
+    <p style="font-size:12px;color:var(--muted)">Saved locally. Tell Claude to create the Drive doc afterwards.</p>
+    <label class="field">Recipe name</label><input type="text" id="nr-name" placeholder="e.g. Chicken Kofta">
+    <label class="field">Category</label>
+    <select id="nr-cat"><option>Chicken</option><option>Beef</option><option>Fish</option><option>Vegetables</option><option>Rice</option><option>Bread</option><option>Drinks</option><option>Dessert</option><option>High Frequency</option></select>
+    <div class="check-label"><input type="checkbox" id="nr-hf"><label for="nr-hf">High Frequency dish</label></div>
+    <label class="field">Ingredients (one per line)</label>
+    <textarea id="nr-ingredients" placeholder="1 kg chicken thighs&#10;2 onions&#10;1 can tomatoes"></textarea>
+    <label class="field">Drive link (optional)</label><input type="text" id="nr-url" placeholder="https://docs.google.com/...">
+    <label class="field">Notes</label><input type="text" id="nr-notes">
+    <button class="submit-btn" onclick="saveCustomRecipe()">Save Recipe</button>
+  </div>
+</div>
+
+<!-- EDIT RECIPE -->
+<div class="overlay" id="modal-edit-recipe" style="display:none" onclick="closeModalOutside(event,'modal-edit-recipe')">
+  <div class="modal"><div class="modal-header"><h3>Edit recipe</h3><button class="close-btn" onclick="closeModal('modal-edit-recipe')">✕</button></div>
+    <input type="hidden" id="edit-recipe-id">
+    <label class="field">Recipe name</label><input type="text" id="edit-name">
+    <label class="field">Category</label>
+    <select id="edit-cat"><option>Chicken</option><option>Beef</option><option>Fish</option><option>Vegetables</option><option>Rice</option><option>Bread</option><option>Drinks</option><option>Dessert</option><option>High Frequency</option></select>
+    <div class="check-label"><input type="checkbox" id="edit-hf"><label for="edit-hf">High Frequency</label></div>
+    <label class="field">Ingredients (one per line)</label><textarea id="edit-ingredients"></textarea>
+    <label class="field">Drive link</label><input type="text" id="edit-url">
+    <label class="field">Notes</label><input type="text" id="edit-notes">
+    <div class="row" style="margin-top:14px">
+      <button class="btn btn-dark" style="flex:1" onclick="saveEditRecipe()">Save changes</button>
+      <button class="btn btn-red" onclick="deleteRecipe(document.getElementById('edit-recipe-id').value)">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECIPE DETAIL -->
+<div class="overlay" id="modal-recipe-detail" style="display:none" onclick="closeModalOutside(event,'modal-recipe-detail')">
+  <div class="modal" style="padding-bottom:30px">
+    <div class="modal-header">
+      <h3 id="rd-name" style="font-size:15px;max-width:80%"></h3>
+      <button class="close-btn" onclick="closeModal('modal-recipe-detail')">✕</button>
+    </div>
+    <div id="rd-meta" style="margin-bottom:10px"></div>
+    <div id="rd-ingredients" style="background:var(--bg);border-radius:8px;padding:11px;margin:10px 0"></div>
+    <div id="rd-notes" style="font-size:13px;color:var(--muted);margin-bottom:10px"></div>
+    <div class="row" id="rd-actions"></div>
+  </div>
+</div>
+
+<!-- SEARCHABLE PICKER -->
+<div class="picker-overlay" id="picker-overlay" style="display:none">
+  <div class="picker-modal">
+    <div class="picker-header">
+      <h3 id="picker-title">Pick a dish</h3>
+      <input class="picker-search" id="picker-search" type="text" placeholder="Type to search…" oninput="filterPicker()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="picker-list" id="picker-list"></div>
+    <div class="picker-cancel"><button onclick="closePicker()">Cancel</button></div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// CONSTANTS & CONFIG
+// ═══════════════════════════════════════════════════════════════════════
+const STORAGE_KEY='kp-v2';
+const DAYS_SHOWN=7;
+
+const CAT_COLORS={
+  'High Frequency':'#c2a16b','Chicken':'#d4956a','Beef':'#a16b6b','Fish':'#6b9ea1',
+  'Vegetables':'#6ba16b','Rice':'#9a8a5a','Bread':'#b8956e','Drinks':'#6b7ea1','Dessert':'#a16b8d'
+};
+const SOURCE_LABEL={
+  'cook':'🍳 Cooked fresh','fridge':'🥡 From fridge','freezer':'❄️ From freezer',
+  'out':'🍽 Ate out','ordered':'📦 Ordered in'
+};
+const DEFAULT_HIDDEN=['Authentic Butter Chicken (Tested 20x)','Instant Pot Butter Chicken'];
+
+// ═══════════════════════════════════════════════════════════════════════
+// PANTRY STAPLES (assumed to have — shown collapsed in shopping)
+// ═══════════════════════════════════════════════════════════════════════
+const PANTRY=['water','salt','oil','neutral oil','olive oil','grapeseed oil','avocado oil',
+  'vegetable oil','ghee','butter','unsalted butter','salted butter','garlic','ginger',
+  'flour','all-purpose flour','atta flour','cornstarch','corn starch','baking soda',
+  'baking powder','sugar','brown sugar','soy sauce','ketchup','tomato paste','vinegar',
+  'lemon juice','lime juice','basmati rice','chicken stock','chicken broth','beef stock',
+  'cumin seeds','coriander seeds','black peppercorns','peppercorns','whole cloves','cloves',
+  'cardamom','cardamom pods','green cardamom','black cardamom','cinnamon stick','cinnamon',
+  'bay leaves','bay leaf','fennel seeds','nigella seeds','carom seeds','ajwain','star anise',
+  'cumin powder','ground cumin','coriander powder','ground coriander','turmeric','red chili powder',
+  'chili powder','kashmiri chili powder','paprika','garam masala','black pepper','red chili flakes',
+  'chili flakes','cayenne','kasuri methi','dried fenugreek','dried oregano','dried basil',
+  'italian seasoning','rosemary','thyme','sesame oil','worcestershire sauce','oyster sauce',
+  'rice vinegar','apple cider vinegar','white vinegar','honey','raw cane sugar','turbinado sugar',
+  'kosher salt','sea salt','chicken bouillon','chicken powder','msg','tandoori masala',
+  'biryani masala','haleem masala','chaat masala','chana masala','peri peri spice'];
+
+function isPantry(raw){
+  const s=raw.toLowerCase().replace(/[^a-z ]/g,'').trim();
+  return PANTRY.some(p=>s===p||s.startsWith(p+' ')||s.endsWith(' '+p)||s.includes(' '+p+' ')||s.includes(p));
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ALIAS MAP FOR SHOPPING CONSOLIDATION
+// ═══════════════════════════════════════════════════════════════════════
+const ALIASES=[
+  {keys:['tomato','roma tomato','vine tomato','cherry tomato','plum tomato','heirloom tomato','salad tomato','ripe tomato','whole tomato'],canon:'Tomatoes',sec:'produce'},
+  {keys:['onion','yellow onion','white onion','red onion','brown onion','spanish onion'],canon:'Onions',sec:'produce'},
+  {keys:['green chili','green chilli','serrano','thai chili','thai chilli','jalapeño','jalapeno','finger chili','finger chilli','indian green chili','bird\'s eye chili','thai green chili','small green chili','green chili pepper','chili pepper'],canon:'Green chili peppers',sec:'produce'},
+  {keys:['garlic clove','garlic'],canon:'Garlic',sec:'produce'},
+  {keys:['ginger','fresh ginger'],canon:'Fresh ginger',sec:'produce'},
+  {keys:['cilantro','coriander leaves','fresh coriander','cilantro leaves'],canon:'Cilantro / coriander',sec:'produce'},
+  {keys:['spinach','fresh spinach','baby spinach'],canon:'Spinach',sec:'produce'},
+  {keys:['eggplant','aubergine','brinjal'],canon:'Eggplant / aubergine',sec:'produce'},
+  {keys:['potato','russet potato','potatoes'],canon:'Potatoes',sec:'produce'},
+  {keys:['carrot','carrots'],canon:'Carrots',sec:'produce'},
+  {keys:['cauliflower'],canon:'Cauliflower',sec:'produce'},
+  {keys:['lemon','fresh lemon'],canon:'Lemons',sec:'produce'},
+  {keys:['lime','fresh lime'],canon:'Limes',sec:'produce'},
+  {keys:['green onion','spring onion','scallion'],canon:'Green onions',sec:'produce'},
+  {keys:['red bell pepper','green bell pepper','yellow bell pepper','bell pepper'],canon:'Bell peppers',sec:'produce'},
+  {keys:['mint','mint leaves','fresh mint'],canon:'Fresh mint',sec:'produce'},
+  {keys:['parsley','fresh parsley'],canon:'Fresh parsley',sec:'produce'},
+  {keys:['dill','fresh dill'],canon:'Fresh dill',sec:'produce'},
+  {keys:['okra'],canon:'Okra',sec:'produce'},
+  {keys:['zucchini','courgette'],canon:'Zucchini',sec:'produce'},
+  {keys:['bitter melon','bitter gourd'],canon:'Bitter melon',sec:'produce'},
+  {keys:['cucumber','persian cucumber','mini cucumber','english cucumber'],canon:'Cucumber',sec:'produce'},
+  {keys:['cabbage','green cabbage','red cabbage'],canon:'Cabbage',sec:'produce'},
+  {keys:['mango'],canon:'Mango',sec:'produce'},
+  {keys:['pineapple'],canon:'Pineapple',sec:'produce'},
+  {keys:['leek','leeks'],canon:'Leeks',sec:'produce'},
+  {keys:['boneless chicken','chicken breast','chicken thigh','chicken thighs','chicken tenderloin','chicken tenders','bone-in chicken','skinless chicken','ground chicken','whole chicken','chicken leg','chicken pieces','chicken'],canon:'Chicken',sec:'meat'},
+  {keys:['ground beef','ground lamb','minced beef','minced lamb','mince','beef mince','lamb mince'],canon:'Ground beef / lamb mince',sec:'meat'},
+  {keys:['beef stew','stew meat','beef shank'],canon:'Beef (stew/shank)',sec:'meat'},
+  {keys:['lamb','goat','bone-in lamb','bone-in goat','mutton'],canon:'Lamb / goat',sec:'meat'},
+  {keys:['skirt steak','flank steak','steak'],canon:'Steak',sec:'meat'},
+  {keys:['salmon','skinless salmon'],canon:'Salmon',sec:'meat'},
+  {keys:['plain yogurt','whole milk yogurt','greek yogurt','plain whole-milk yogurt','plain whole milk yogurt','yogurt'],canon:'Plain yogurt',sec:'dairy'},
+  {keys:['heavy cream','heavy whipping cream','whipping cream','double cream'],canon:'Heavy cream',sec:'dairy'},
+  {keys:['whole milk','full fat milk','milk'],canon:'Whole milk',sec:'dairy'},
+  {keys:['paneer','frozen paneer','amul paneer'],canon:'Paneer',sec:'dairy'},
+  {keys:['egg','eggs','large egg','whole egg'],canon:'Eggs',sec:'dairy'},
+  {keys:['cream cheese'],canon:'Cream cheese',sec:'dairy'},
+  {keys:['sour cream'],canon:'Sour cream',sec:'dairy'},
+  {keys:['evaporated milk'],canon:'Evaporated milk',sec:'dairy'},
+  {keys:['condensed milk','sweetened condensed milk'],canon:'Condensed milk',sec:'dairy'},
+  {keys:['mozzarella'],canon:'Mozzarella',sec:'dairy'},
+  {keys:['parmesan'],canon:'Parmesan',sec:'dairy'},
+  {keys:['canned tomatoes','crushed tomatoes','diced tomatoes','whole peeled tomatoes','san marzano tomatoes','tomato puree','tomato purée'],canon:'Canned / crushed tomatoes',sec:'tins'},
+  {keys:['canned chickpeas','chickpeas','garbanzo'],canon:'Canned chickpeas',sec:'tins'},
+  {keys:['coconut milk','full fat coconut milk','unsweetened coconut milk'],canon:'Coconut milk (canned)',sec:'tins'},
+  {keys:['kidney beans','red kidney beans'],canon:'Kidney beans (canned)',sec:'tins'},
+  {keys:['black-eyed peas','black eyed peas'],canon:'Black-eyed peas',sec:'tins'},
+  {keys:['masoor dal','red lentils','red split lentils'],canon:'Masoor dal (red lentils)',sec:'dry'},
+  {keys:['moong dal','split moong','yellow lentils','mung beans'],canon:'Moong dal',sec:'dry'},
+  {keys:['chana dal','split chickpeas'],canon:'Chana dal',sec:'dry'},
+  {keys:['urad dal','maash dal','black gram'],canon:'Urad / maash dal',sec:'dry'},
+  {keys:['whole masoor','brown lentils'],canon:'Whole masoor dal',sec:'dry'},
+  {keys:['panko breadcrumbs','breadcrumbs'],canon:'Breadcrumbs',sec:'dry'},
+  {keys:['gram flour','besan','chickpea flour'],canon:'Gram flour (besan)',sec:'dry'},
+  {keys:['semolina','sooji'],canon:'Semolina (sooji)',sec:'dry'},
+  {keys:['puff pastry','spring roll pastry','pastry sheets'],canon:'Pastry / puff pastry',sec:'dry'},
+  {keys:['pita bread','pita','naan'],canon:'Bread (pita/naan)',sec:'dry'},
+  {keys:['tortillas','flour tortillas','corn tortillas'],canon:'Tortillas',sec:'dry'},
+  {keys:['jaggery','gur'],canon:'Jaggery (gur)',sec:'dry'},
+  {keys:['pearl barley','barley'],canon:'Pearl barley',sec:'dry'},
+  {keys:['rolled oats','oats'],canon:'Rolled oats',sec:'dry'},
+  {keys:['cashews','unsalted cashews'],canon:'Cashews',sec:'dry'},
+  {keys:['almonds','slivered almonds','blanched almonds','raw almonds'],canon:'Almonds',sec:'dry'},
+];
+const SEC_ORDER=['produce','meat','dairy','tins','dry','other'];
+const SEC_LABELS={produce:'🥬 Produce & Fresh Herbs',meat:'🥩 Meat & Fish',dairy:'🧀 Dairy & Eggs',tins:'🥫 Tins & Canned',dry:'🌾 Dry Goods & Bread',other:'🛒 Other'};
+
+function canonicalise(raw){
+  const stripped=raw.replace(/^[\d¼½¾⅓⅔⅛\-–\/\.\s]+(cups?|tbsps?|tsps?|lbs?|ozs?|g|kg|ml|l|cans?|packages?|bunches?|pieces?|whole|small|medium|large|handful|pinch|dash)s?\s*/i,'').trim();
+  const clean=stripped.replace(/\s*\(.*?\)\s*/g,' ').replace(/,.*$/,'').trim().toLowerCase();
+  for(const a of ALIASES){for(const k of a.keys){if(clean===k||clean.startsWith(k+' ')||clean.endsWith(' '+k)||clean.includes(' '+k+' ')||clean.includes(k))return{canon:a.canon,sec:a.sec};}}
+  return{canon:stripped,sec:'other'};
+}
+function extractQty(raw){
+  const m=raw.match(/^([\d¼½¾⅓⅔⅛\-–\/\.\s]+(cups?|tbsps?|tsps?|lbs?|ozs?|g|kg|ml|l|cans?|packages?|bunches?|pieces?|small|medium|large|whole)?s?)/i);
+  return m?m[0].trim():'';
+}
+function parseQty(s){
+  if(!s)return 0;
+  const r=s.replace('¼','0.25').replace('½','0.5').replace('¾','0.75').replace('⅓','0.33').replace('⅔','0.67').replace('⅛','0.125');
+  const rng=r.match(/^([\d.]+)[\-–]([\d.]+)/);if(rng)return(parseFloat(rng[1])+parseFloat(rng[2]))/2;
+  const n=r.match(/^[\d.]+/);return n?parseFloat(n[0]):0;
+}
+function extractUnit(q){if(!q)return'';const m=q.match(/(cups?|tbsps?|tsps?|lbs?|ozs?|g|kg|ml|l|cans?|packages?|pieces?|whole|small|medium|large)/i);return m?m[1].toLowerCase().replace(/s$/,''):'';}
+function fmtQty(num,unit){
+  const f=n=>{const i=Math.floor(n),fr=n%1;const fs=fr<0.1?'':fr<0.2?'⅛':fr<0.4?'¼':fr<0.6?'½':fr<0.9?'¾':'';return(i>0?String(i):'')+(fs||'');};
+  const r=f(num)||String(Math.round(num));return unit?r+' '+unit:r;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════
+let state={
+  mealPlan:[],       // [{id,date,type:'cook'|'fridge'|'freezer'|'out',dish,note,notes,status:'planned'|'cooked'|'eaten',cookedDate}]
+  planStartDate:null,// ISO date string — start of floating 7-day window
+  fridge:[],         // [{id,dish,date,servings,notes}]
+  freezer:[],        // [{id,dish,frozenDate,portions,notes}]
+  dinnerDiary:[],    // [{id,date,dish,source,notes}]
+  disposedLog:[],    // [{id,date,dish,type,notes}]
+  cookingLog:[],     // [{id,date,dish,servings,notes}] — auto-populated when cooked
+  customRecipes:[],  // [{id,name,category,highFreq,ingredients[],driveUrl,notes,custom}]
+  shoppingList:null,
+  deletedRecipes:[],
+};
+
+function loadState(){
+  try{const s=localStorage.getItem(STORAGE_KEY);if(s)state=Object.assign(state,JSON.parse(s));}catch(e){}
+  if(!state.deletedRecipes)state.deletedRecipes=[];
+  DEFAULT_HIDDEN.forEach(n=>{if(!state.deletedRecipes.includes(n))state.deletedRecipes.push(n);});
+  if(!state.planStartDate)state.planStartDate=todayISO();
+  if(!state.mealPlan)state.mealPlan=[];
+  if(!state.fridge)state.fridge=[];
+  if(!state.dinnerDiary)state.dinnerDiary=[];
+  if(!state.disposedLog)state.disposedLog=[];
+  if(!state.cookingLog)state.cookingLog=[];
+}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
+
+// ═══════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════════
+function uid(){return Math.random().toString(36).slice(2,9);}
+function todayISO(){return new Date().toISOString().split('T')[0];}
+function addDaysToISO(iso,n){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+function fmtDate(iso){return new Date(iso+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+function fmtDay(iso){return new Date(iso+'T00:00:00').toLocaleDateString('en-US',{weekday:'long'});}
+function daysSince(iso){return Math.round((new Date(todayISO())-new Date(iso+'T00:00:00'))/86400000);}
+function cc(cat){return CAT_COLORS[cat]||'#888';}
+function allRecipes(){
+  const del=state.deletedRecipes||[];
+  return[...RECIPES,...(state.customRecipes||[])].filter(r=>!del.includes(rN(r)));
+}
+function findRecipe(name){return allRecipes().find(r=>rN(r)===name||rN(r).toLowerCase()===name.toLowerCase());}
+function rN(r){return r.n||r.name||'';}
+function rC(r){return r.c||r.category||'';}
+function rHF(r){return r.hf||r.highFreq||false;}
+function rU(r){return r.u||r.driveUrl||null;}
+function rI(r){return r.i||r.ingredients||[];}
+
+// Plan day helpers
+function getPlanDays(){
+  const days=[];
+  for(let i=0;i<DAYS_SHOWN;i++)days.push(addDaysToISO(state.planStartDate,i));
+  return days;
+}
+function getPlanEntry(date){return(state.mealPlan||[]).find(e=>e.date===date);}
+function setPlanEntry(entry){
+  state.mealPlan=(state.mealPlan||[]).filter(e=>e.date!==entry.date);
+  state.mealPlan.push(entry);
+  saveState();
+}
+function removePlanEntry(date){state.mealPlan=(state.mealPlan||[]).filter(e=>e.date!==date);saveState();}
+
+// Last cooked / last eaten helpers
+function lastCooked(dish){
+  const entries=(state.cookingLog||[]).filter(e=>e.dish.toLowerCase()===dish.toLowerCase()).sort((a,b)=>b.date.localeCompare(a.date));
+  return entries.length?entries[0].date:null;
+}
+function lastEaten(dish){
+  const entries=(state.dinnerDiary||[]).filter(e=>e.dish.toLowerCase()===dish.toLowerCase()).sort((a,b)=>b.date.localeCompare(a.date));
+  return entries.length?entries[0].date:null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SHOPPING LIST
+// ═══════════════════════════════════════════════════════════════════════
+function buildShoppingList(){
+  // Only cook-fresh days contribute
+  const cookDays=(state.mealPlan||[]).filter(e=>e.type==='cook'&&e.dish);
+  if(!cookDays.length)return null;
+  const consolidated={};const pantryMap={};const infoItems=[];
+  for(const entry of cookDays){
+    const r=findRecipe(entry.dish);
+    const ings=r?rI(r):[];
+    if(!ings.length){
+      const k=entry.dish+':nodata';
+      if(!consolidated[k])infoItems.push({name:'['+entry.dish+': open Drive recipe for ingredients]',checked:false,info:true,sec:'other'});
+      continue;
+    }
+    for(const raw of ings){
+      if(isPantry(raw)){
+        const{canon}=canonicalise(raw);const k=canon.toLowerCase().slice(0,40);
+        if(!pantryMap[k])pantryMap[k]={name:canon,qty:extractQty(raw),needed:false};
+        continue;
+      }
+      const qty=extractQty(raw);const unit=extractUnit(qty);const qtyNum=parseQty(qty);
+      const{canon,sec}=canonicalise(raw);const k=canon.toLowerCase();
+      if(!consolidated[k]){consolidated[k]={name:canon,sec,unit,total:qtyNum,rawQtys:[qty],checked:false};}
+      else{
+        if(unit===consolidated[k].unit){consolidated[k].total+=qtyNum;consolidated[k].rawQtys.push(qty);}
+        else if(qty&&!consolidated[k].rawQtys.includes(qty)){consolidated[k].rawQtys.push(qty);consolidated[k].unit='';}
+      }
+    }
+  }
+  const sections={};SEC_ORDER.forEach(s=>sections[s]=[]);
+  infoItems.forEach(x=>sections['other'].push(x));
+  Object.values(consolidated).forEach(item=>{
+    const s=item.sec||'other';if(!sections[s])sections[s]=[];
+    let dq='';
+    if(item.unit&&item.total>0)dq=fmtQty(item.total,item.unit);
+    else if(item.rawQtys.length===1)dq=item.rawQtys[0];
+    else if(item.rawQtys.length>1)dq=item.rawQtys.join(' + ');
+    sections[s].push({name:item.name,qty:dq,checked:item.checked,sec:s});
+  });
+  const buyItems=[];SEC_ORDER.forEach(s=>{if(sections[s]&&sections[s].length)sections[s].forEach(x=>buyItems.push(x));});
+  return{items:buyItems,pantryItems:Object.values(pantryMap),generatedFor:cookDays.map(e=>e.dish),sections};
+}
+function regenerateShopping(){state.shoppingList=null;renderShopping();}
+
+const RECIPES=[
+// ── HIGH FREQUENCY ──────────────────────────────────────────────────────
+{n:"Butter Chicken",c:"High Frequency",hf:true,u:"https://docs.google.com/document/d/1IFgATH2Ho-P2iGMOvokaXX2tWFVje4ON1EwFnTyjfDE/edit",i:["700g boneless chicken thighs, cut into chunks","½ cup plain yogurt","1 tbsp lemon juice","1 tsp kashmiri chili powder (or ½ red chili + ½ paprika)","1 tsp garam masala","½ tsp ground cumin","1 tsp salt","4 tbsp unsalted butter","1 green chili pepper (serrano or jalapeño), finely chopped","5 garlic cloves, minced","1 tbsp fresh ginger, grated","3 tbsp tomato paste","400g canned crushed tomatoes","1 tsp kashmiri chili powder (for sauce)","1 tsp ground coriander","½ tsp ground cumin (for sauce)","1 tsp sugar","½ cup heavy cream (100ml Al Marai)","1½ tbsp kasuri methi, crushed","¾ tsp salt (for sauce)"]},
+{n:"Palak Chicken (Chicken Saag)",c:"High Frequency",hf:true,u:"https://drive.google.com/file/d/1m7PuGuSPQxcpdgjwxA4_2xGLCX4uj4FF/view",i:["⅓ cup neutral oil","½ tsp cumin seeds","6 black peppercorns","½ inch cinnamon stick","1 small yellow onion, finely chopped","6 garlic cloves, crushed","1 inch ginger, crushed","1 lb bone-in skinless chicken (leg quarters)","1 tsp red chili powder","1 tsp coriander powder","½ tsp cumin powder","½ tsp turmeric powder","1¼ tsp kosher salt","1 medium Roma tomato, finely chopped","1.2 lb fresh or frozen spinach, finely chopped","2 tbsp ghee or unsalted butter","3 tbsp heavy whipping cream","2 tsp dried fenugreek leaves (kasuri methi)","1 small green chili pepper (serrano or Thai), chopped","⅛–¼ tsp garam masala (optional)","2 tbsp fresh cilantro, finely chopped"]},
+{n:"Baingan Burani",c:"High Frequency",hf:true,u:"https://drive.google.com/file/d/1Tc4YcSKJkT6Cy0tKYqK2htBi8YVuZ9H7/view",i:["2 large eggplants (long thin), sliced into thin rounds","2 medium onions, thinly sliced","2 cups plain whole-milk yogurt","3 tsp garlic cloves, minced","1 tsp chili powder","1 tsp garam masala","1 tsp turmeric","1 tsp coriander powder","1 tsp salt","½ tsp bhuna zeera (toasted cumin powder)","⅓ cup slivered almonds","½ cup neutral oil for frying","1 tsp chaat masala (optional)","Handful cilantro, green chilies, sliced onions for garnish"]},
+{n:"Bangan Ka Bharta",c:"High Frequency",hf:true,u:"https://drive.google.com/file/d/1BKaeExocFo_oHiVEPNfX5O0aXeOwSKJ-/view",i:["1 whole eggplant","2-3 whole tomatoes","1 whole onion, diced","1 tsp cumin seeds","1 tsp salt/turmeric/chili mix","1 tbsp oil"]},
+{n:"Nihari (Instant Pot)",c:"High Frequency",hf:true,u:"https://drive.google.com/file/d/1kW8RYrAdielMInGPeRtHiKwbEn-l31HE/view",i:["1 star anise","2 small bay leaves","1 (3-4 inch) cinnamon stick","4 whole cloves","3 green cardamom pods","1 small black cardamom pod","1 small mace blade","¾ tsp fennel seeds","1½ tsp paprika powder","½ tsp coriander powder","½ tsp cumin powder","½ tsp red chili powder","¼ tsp turmeric","¼ tsp garam masala","¼ tsp ginger powder","¼ tsp onion powder","¼ tsp ground black pepper","⅛ tsp garlic powder","⅛ tsp caraway seeds (shah zeera)","⅛ tsp nigella seeds (kalonji)","Pinch nutmeg","2 tsp kosher salt","⅓ cup neutral oil","1 tbsp ghee or butter","1 large onion, thinly sliced","5-6 garlic cloves, minced","1 inch ginger, crushed","1 lb beef stew or shank pieces","4 cups beef stock","¼ cup flour","⅓–½ lb beef bones","Garnish: julienned ginger, lemon wedges, cilantro, green chilies"]},
+{n:"İskender Kebab",c:"High Frequency",hf:true,u:"https://docs.google.com/document/d/1rzt2Cg1ILFTBTf4OlfREwcz71dyXvYCUxpVUT1kdbBE/edit",i:["600g ground beef (80/20) or half beef half lamb","1 onion, grated (squeeze out liquid)","3 garlic cloves, minced","1 tsp ground cumin","1 tsp paprika (sweet or smoked)","½ tsp ground coriander","½ tsp black pepper","1 tsp salt","1 tbsp olive oil","4 tbsp butter","400g canned crushed tomatoes","2 tbsp tomato paste","½ tsp sugar","1 tsp salt and pepper for sauce","4 pita breads, torn into bite-sized pieces","1 cup plain full-fat yogurt","1 garlic clove (for yogurt)","½ tsp dried chili flakes (optional)"]},
+// ── CHICKEN ──────────────────────────────────────────────────────────────
+{n:"Pakistani Chicken Karahi",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/12ilr4ygjecDb2yBPmnqkLzkDiYIzFYeS/view",i:["2 tbsp ghee","2-3 tbsp neutral oil","1 small onion, finely chopped","8 garlic cloves, crushed","¾ inch ginger, crushed","1-2 Serrano or Thai green chili peppers (whole)","2-2.2 lbs skinless bone-in chicken, cut up","8 small Roma or Vine tomatoes, diced","2 tsp coriander powder","1 tsp cumin powder","1 tsp red chili powder","2 tsp kosher salt (divided)","¼ cup plain whole-milk yogurt, whisked","1 tsp black peppercorns, freshly ground","½ tsp garam masala","2-3 green chili peppers, slit in half","1-2 tbsp fresh ginger, julienned","1 tbsp fresh cilantro, chopped"]},
+{n:"Authentic Chicken Curry (Chicken Salan)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/10BvRfaKlm8NKZZbszrYwnIcvUtyp_SvQ/view",i:["⅓ cup neutral oil","2 small yellow onions, quartered","2 small Roma tomatoes, quartered","6-8 garlic cloves, crushed","1 inch ginger, crushed","2 lbs bone-in skinless chicken","2¼ tsp kosher salt (divided)","1-2 small green chili peppers, sliced","1 tsp whole coriander seeds, roughly crushed","1 tsp cumin seeds","5-6 whole black peppercorns","3-4 whole cloves","1 tsp coriander powder","1 tsp red chili powder","½ tsp crushed chili flakes (optional)","½ tsp turmeric powder","¼ tsp ground black pepper","¼–½ tsp garam masala","2-3 tbsp cilantro leaves, chopped"]},
+{n:"Chicken Korma",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1xYHbHwjnnHbd6Q8WOpoZPjPgUIiwIVd4/view",i:["⅓ cup neutral oil","2 tbsp ghee","2 large onions, sliced","2 lbs bone-in skinless chicken","2 small tomatoes, quartered (optional)","¾ cup plain whole-milk yogurt","2 bay leaves","1 tsp cumin seeds","⅛ tsp whole black peppercorns","3 green cardamom pods","5 whole cloves","1 inch cinnamon stick","8-10 garlic cloves, crushed","1 inch ginger, crushed","2 tsp coriander powder","1 tsp cumin powder","1 tsp red chili powder","½ tsp turmeric","½ tsp paprika or Kashmiri chili powder","2⅛ tsp salt","2-3 green chili peppers, chopped","1-2 black cardamom pods (optional)","1 blade mace","½ tsp garam masala","Pinch nutmeg","2-3 tbsp heavy whipping cream (optional)","½–1 tsp kewra essence","¼ cup cilantro leaves (for garnish)","10-12 blanched almonds (for garnish)"]},
+{n:"Chicken Jalfrezi",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1GL0SA9mzKst424qIUwtwTEqj99BA_FZE/view",i:["¼ cup neutral oil","1 tsp cumin seeds","1 medium yellow onion, finely chopped","5-6 garlic cloves, crushed","1 inch ginger, crushed","1 lb boneless chicken thighs, cubed","2 tsp coriander powder","1 tsp Kashmiri red chili powder or paprika","½ tsp turmeric","½ tsp red chili powder","¼–½ tsp garam masala","¼ tsp ground black pepper","1⅛ tsp sea salt","3 small Roma tomatoes, pureed","2 tsp tomato paste (optional)","1 small green bell pepper, cubed","1 small red bell pepper, cubed","½ small red or yellow onion, cubed","1-2 small green chili peppers, chopped","1 tbsp soy sauce","1 tbsp ketchup","1 tsp white or rice vinegar","1 tsp lemon or lime juice","1 tbsp cilantro (for garnish)"]},
+{n:"Chicken Kofta (Ground Chicken Meatballs)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1-uFfiljgVQfUn4OdsYFJ_os9rcMlHpaP/view",i:["1 lb ground chicken (preferably thighs)","1 egg","½ cup very finely chopped red onion","½ cup panko breadcrumbs","⅓ cup shredded mozzarella or grated parmesan","2 tbsp olive oil","2 garlic cloves, minced","1 tsp coriander powder","1 tsp cumin powder","¾–1 tsp red chili powder","½ tsp ground black pepper","¼ tsp garam masala","¼ tsp turmeric (optional)","1–1¼ tsp kosher salt","¼ cup cilantro leaves, finely chopped","2 tbsp mint leaves, finely chopped"]},
+{n:"Chicken Shashlik (Indo-Chinese)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1lVnXBihBGyd1ses9M7jH-o3EfJIfrj1x/view",i:["1 lb boneless chicken breast or thighs, cut into 1 inch pieces","¼ cup plain whole milk yogurt","1 tbsp Worcestershire sauce","1 tbsp soy sauce","1 tbsp distilled white vinegar","2 tsp sugar","½–1 tsp red chili flakes","½ tsp paprika powder","½ tsp ground black pepper","1 tsp sea salt","¼ cup tomato ketchup","3 tbsp tomato paste","1½ tbsp chili garlic sauce","1 tbsp soy sauce (sauce)","1 tsp distilled white vinegar (sauce)","½ tsp sea salt (sauce)","½ tsp sugar (sauce)","¼ tsp white pepper powder","2 tsp corn starch","1 tbsp minced garlic","1 tbsp minced ginger","1 small to medium red onion, cubed","1 small green bell pepper, cubed","1 small red bell pepper, cubed","¼ cup neutral oil (divided)"]},
+{n:"Chicken Manchurian",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1ZvtFfvldHMoaWagkzFilKnZAFz9E4LpY/view",i:["1 lb boneless chicken thighs or breast, cubed","1 egg white, whisked","1 tsp soy sauce","1 tsp rice vinegar","¼ tsp baking soda","¼ tsp kosher salt","3 tbsp cornstarch (marinade)","⅓ cup all-purpose flour","⅓ cup cornstarch (coating)","¾ tsp kosher salt (coating)","½ tsp baking powder","½ tsp red chili powder","¾ cup vegetable or chicken stock","⅓ cup tomato puree","2 tbsp ketchup","2 tbsp chili garlic sauce","1½ tbsp raw cane sugar","1 tbsp soy sauce (sauce)","¾ tsp kosher salt (sauce)","½ tsp red chili flakes","1 tsp cornstarch (sauce)","2 tbsp neutral oil plus more for frying","4 green onions, finely chopped","5 garlic cloves, minced","1 inch ginger, minced","1 small Thai green chili or Serrano pepper","Sesame seeds for garnish (optional)"]},
+{n:"Chilli Chicken (Crispy)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1Ll3YmJQrlxl_y1MdrwYGFuY-riF24EL9/view",i:["1 lb boneless chicken breast, cubed","¾ tsp freshly ground black pepper","¾ tsp sea salt","1 tsp soy sauce","¼ tsp sesame oil","½ tsp garlic paste","½ tsp ginger paste","¼ tsp baking soda","1 small egg, whisked","½ cup cornstarch","¼ cup all-purpose flour","3 tbsp ketchup","1 tbsp desi-style chilli garlic sauce","1 tbsp Asian-style chilli garlic sauce","2 tbsp soy sauce (sauce)","1½ tsp Worcestershire sauce","1 tsp rice vinegar","½ tsp red chili flakes","¼ tsp sea salt (sauce)","1½ tsp honey","1 tsp sesame oil (sauce)","⅓ cup vegetable stock","3 tbsp neutral oil plus more for frying","4-5 garlic cloves, finely chopped","1 inch ginger, finely chopped","5 green onions, chopped","1 small yellow onion, cubed","½ small green bell pepper, cubed","3 Thai green chili peppers (whole)","8 whole dried red chilli peppers"]},
+{n:"Chicken 65 (Saucy, Fiery)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1P-GUa95xUMtWm9El6qAggwP20ODxlyjV/view",i:["1 lb boneless chicken breast, cubed","1–1½ tsp red chili powder","1 tsp freshly ground black pepper","1½ tsp sea salt","¼ tsp baking soda","1 small egg, whisked","¼ cup + 1 tbsp corn starch","2 tbsp all-purpose flour","Neutral oil for frying","¼ cup water","⅛ tsp red or orange food color","¼ cup neutral oil (tarka)","1½ tsp cumin seeds","2 garlic cloves, thinly sliced","2-3 small mild green chili peppers","5 whole dried red chili peppers","1 tsp garlic paste","1 tsp ginger paste","3 sprigs fresh curry leaves","⅓ cup South Asian-style chili garlic sauce","⅓ cup plain whole milk yogurt, whisked","Lemon wedges for serving"]},
+{n:"Honey Ginger Chicken (Crispy)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1p37uaNtAULF07RgDswcVtGqvxyDl201b/view",i:["1 lb boneless chicken breast, cubed","1 egg white","1 tbsp crushed garlic","1 tbsp soy sauce","½ tsp white pepper powder","½ tsp black pepper powder","¾ tsp sea salt","¼ tsp baking soda","1 tsp sesame oil","⅓–½ cup cornstarch","2 tbsp all-purpose flour","¼ cup + 1 tbsp honey","¼ cup + 1 tbsp South Asian-style chilli garlic sauce","3½ tbsp soy sauce (sauce)","1 tbsp grated ginger","1 small green chili, deseeded and finely chopped","1½ tsp rice vinegar","1 tbsp neutral oil plus more for frying","1 medium yellow onion, cubed","1 medium green bell pepper, cubed","1-2 tbsp julienned ginger","Sesame seeds for garnish (optional)"]},
+{n:"Chicken with Cashew Nuts (Indo-Chinese)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1fLu4qa1Z-jiEXm44Wq1lvbIs5xeYsl8H/view",i:["1 lb boneless chicken breast, cut into pieces","3 tbsp neutral oil","¾ inch ginger, finely minced","4 garlic cloves, finely minced","1 small green bell pepper, diced into 1 inch squares","1 small onion, diced into 1 inch squares","½ cup toasted unsalted cashews","Toasted sesame seeds for garnish (optional)","1 tsp baking soda","½ tsp kosher salt","2 tsp corn starch","2 tbsp oyster sauce","2 tsp soy sauce","1 tsp rice vinegar","1 tsp sesame oil","¾–1 tsp red chili flakes","¼ tsp ground black pepper","⅛ tsp white pepper","1 tsp sugar","¼ cup water"]},
+{n:"Kadai Chicken",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1Ssp5vwQQ1fUs5Vxc525lfaOL5Vjde92S/view",i:["1 kg chicken","4 tomatoes, finely diced","1 onion, ground to paste","1 tsp ginger paste","1 tsp garlic paste","1 tsp chili powder","Coriander leaves for garnish","Green chilies for garnish","Julienned ginger for garnish"]},
+{n:"Tandoori Chicken",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1B1HXEKLu4u5YP-zLofdTbPOcfY0mrhPd/view",i:["5 chicken leg quarters, skinless (~2.5 lb)","⅓ cup plain whole-milk Greek yogurt","2 tbsp neutral oil","2 tbsp melted butter","2 tbsp lemon juice","6-8 garlic cloves, finely chopped","1 inch ginger, finely chopped","1 tbsp tomato paste","1 tbsp Kashmiri chili powder","2 tsp coriander powder","2 tsp cumin powder","1½ tsp red chili powder or cayenne","1 tsp garam masala","½ tsp turmeric","½ tsp ground black pepper","1 tbsp dried fenugreek leaves","2½ tsp kosher salt","⅛ tsp sugar","Pinch deep orange food color (optional)","Cilantro, lemon wedges, thinly sliced red onion for serving"]},
+{n:"Baked Tandoori Chicken Curry",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1HWFtLQfsDz0nuxSxpKjFGwkqa5rqfg3w/view",i:["1 whole chicken, skinless and cut up","1 medium red onion","1½ cups plain whole-milk yogurt","2-3 tbsp tomato paste","2 tbsp tandoori masala powder","½ cup cilantro","1 small green chili pepper","½–1 tbsp lemon juice","3 tbsp neutral oil"]},
+{n:"Chicken Chargha (Steam Roast)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1LqIY9nTmEnY6aEFJbFrH_sJ7_wAxSjnN/view",i:["1 small whole chicken, skinless","⅓ cup plain Greek yogurt","3 tbsp lemon juice","1 tbsp crushed garlic","1 tbsp crushed ginger","1 tbsp coriander powder","2 tsp cumin powder","2 tsp Kashmiri chili powder","2 tsp red chili flakes","1 tsp garam masala","1 tsp red chili powder","½ tsp carom seeds (ajwain)","4 tsp kosher salt","2 medium russet potatoes","½ medium red onion","1 tsp chaat masala","Lemon wedges for serving"]},
+{n:"Pakistani Chicken Biryani",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/18bKMyVJ-_JZrU-jE_l-4gQVms6OVW0nD/view",i:["1¼ lbs bone-in skinless chicken","½ cup plain whole milk yogurt","1 tbsp neutral oil","2 tbsp biryani masala","1 tsp coriander powder","½ tsp cumin powder","½–1 tsp red chili powder","¼ tsp turmeric","¼ tsp nutmeg","Pinch cane sugar","2 tsp kosher salt","1¾ cups aged basmati rice","1½ tbsp kosher salt (for rice water)","1 tbsp oil (for rice water)","1 tsp lemon juice or vinegar (for rice water)","¼ cup neutral oil","2 tbsp ghee","2 medium yellow onions, thinly sliced","6-8 garlic cloves, crushed","1 inch ginger, crushed","1 small tomato, finely chopped","1-2 small green chili peppers, chopped","5 dried plums (alu bukhara)","3 medium dried bay leaves","5-6 whole cloves","4-5 whole black cardamoms","6 star anise","6 green cardamom pods","2 cinnamon sticks","¾ tsp cumin seeds","½ tsp whole black peppercorns","1 tsp kewra essence","1 tsp lemon juice","½ tsp chaat masala","⅛ tsp yellow food coloring mixed with 1 tbsp milk","Cilantro and mint for garnish"]},
+{n:"Pakistani Chicken Pulao (Yakhni)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/13hECL6bNRYBycV2hA1wNUUmRfctUteTt/view",i:["1¼ lb bone-in skinless chicken","½ small yellow onion, roughly chopped (for broth)","½ tbsp cumin seeds (broth)","½ tbsp coriander seeds (broth)","½ tbsp black peppercorns (broth)","1 (2-inch) cinnamon stick (broth)","1 medium dried bay leaf (broth)","3 green cardamom pods (broth)","1 black cardamom (broth)","3 whole cloves (broth)","2 tsp kosher salt (broth)","1½ cups aged basmati rice","¼ cup neutral oil","2 tbsp ghee or butter","1 medium yellow onion, thinly sliced","4-5 garlic cloves, crushed","¾ inch ginger, crushed","½ tsp kosher salt","2 small green chili peppers, finely chopped","1 small Roma tomato, finely chopped (optional)","1½ tbsp yogurt, whisked","½ tsp freshly ground black pepper","½ tsp garam masala","3 tbsp cilantro leaves, finely chopped","2 tbsp mint leaves, finely chopped"]},
+{n:"Instant Pot Chicken Pulao",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1bnUlRWkK-lv3VDLPddk12LPC93UpSmEp/view",i:["1½ cups aged basmati rice","2 tbsp neutral oil","1 tbsp ghee","1 medium yellow onion, thinly sliced","2 small bay leaves","½ tsp whole black peppercorns","1 (2-inch) cinnamon stick","1 small black cardamom (optional)","5 whole cloves","1 tsp cumin seeds","½ tsp coriander seeds, crushed","4 garlic cloves, crushed","¾ inch ginger, crushed","1 lb boneless chicken, cubed","1 small tomato, finely chopped","1-2 green chili peppers","1½ cups water","2¼ tsp kosher salt (divided)","Small handful cilantro and/or mint"]},
+{n:"Instant Pot Chicken Potato Curry",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1KxhTcZw77vrwhEzMHUGj9cTmPr7lAKNy/view",i:["1 medium yellow onion","1 medium tomato","¼ cup neutral oil","1 lb bone-in skinless chicken","3-4 garlic cloves, crushed","⅓ inch ginger, crushed","1 small green chili pepper, sliced","1¼ tsp kosher salt","2 small Russet potatoes, peeled and cut into large chunks","¼ tsp whole coriander seeds, crushed (optional)","1 tsp cumin seeds","5 whole black peppercorns","2 whole cloves","½ tsp Kashmiri chili or mild red chili powder","½ tsp turmeric","¼ tsp cumin powder","¼ tsp coriander powder","2 tbsp cilantro leaves, chopped","¼ tsp garam masala"]},
+{n:"Chicken Curry with Coconut Milk & Potatoes",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1v3_csTUKBr4kMsa9Xormx9oby-4KND-4/view",i:["2 tbsp refined coconut oil","½ tsp cumin seeds","1 small cinnamon stick","2 green cardamom pods (optional)","1 medium yellow onion, finely chopped","5 garlic cloves, crushed","½ inch ginger, crushed","1 green chili pepper, slit in half","1 medium Roma tomato, chopped","1 medium to large Russet potato, cubed","1 green or red bell pepper, cubed (optional)","1 tsp coriander powder","½ tsp cumin powder","½ tsp turmeric","¼ tsp black pepper","¼–1 tsp red chilli flakes","1½ tsp kosher salt","1 lb boneless chicken breast or thighs, cubed","1 can (14oz) unsweetened full-fat coconut milk","¼ cup plain whole milk yogurt","2 tbsp cilantro leaves, chopped","Lime or lemon slices for serving"]},
+{n:"20-Minute Coconut Lime Chicken Curry",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1OSkMg-a6EGefmxPIOJ2-3OQEmBnQfZkB/view",i:["1 chicken breast or tenders, cubed","1 tsp baking soda (optional tenderizer)","2 tbsp refined coconut oil","1 green chili pepper, slit and deseeded","2-3 garlic cloves, crushed","½ inch ginger, crushed","½ tsp coriander powder","½ tsp cumin powder","Scant ¼ tsp turmeric","⅛ tsp black pepper","Generous pinch red chili powder","1 can (13.5–14oz) unsweetened coconut milk","Salt to taste","1 medium lime, zested and juiced","2 tbsp cilantro, chopped"]},
+{n:"Peri Peri Chicken",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1WxB7xQ5YLRz5vuH9MZL634S1IQzNow1W/view",i:["2 lbs bone-in skinless chicken","1 small to medium red bell pepper (140-170g), halved and roasted","¼ cup freshly squeezed lemon juice","2 tbsp apple cider vinegar","2 tbsp oil","8 garlic cloves","2 tbsp Peri Peri spice blend","1 tbsp oregano","1 tsp ground black pepper","2 tsp sugar","2¼ tsp kosher salt","2-3 tbsp neutral oil","¼ cup mayonnaise (or sour cream, yogurt, heavy cream)"]},
+{n:"Tandoori Chicken Pizza",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1VRIPmQRJLC5_arF6OD048BSxSGVZyFlH/view",i:["1 chicken breast, cut into thin pieces","¼ cup plain whole milk yogurt","½ tbsp lemon juice","½ tbsp crushed garlic","½ tbsp crushed ginger","1 tbsp neutral oil","1-2 tsp tomato paste","½ tsp sea salt","1 tbsp tandoori masala powder","1 tsp paprika powder","2½ cups bread flour","2 tbsp olive oil","1½ tsp salt","1 tsp sugar","1 cup warm water","1 packet active dry yeast","1 can (28oz) San Marzano whole peeled tomatoes","1 small onion","1 small green chili pepper (Serrano)","2 tbsp olive oil (sauce)","2-3 garlic cloves","1 medium bay leaf","2-3 tbsp tomato paste","1 tsp sugar (sauce)","1 tsp sea salt (sauce)","1 tsp dried oregano","½ tsp Italian seasoning or basil","½–1 tsp tandoori masala powder","2 cups mozzarella cheese","Red bell pepper, green bell pepper, red onion (optional toppings)"]},
+{n:"Chicken Puff Pastry (Patties)",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1KnGRn61c-x7VmlpSHT5Xtc4NLDYJ96-E/view",i:["1 lb boneless skinless chicken breast","1 garlic clove","2 packages puff pastry (14–17oz each), thawed","1 small yellow onion, finely chopped","1 medium to large Serrano pepper, deseeded and finely chopped","3 tbsp all-purpose flour","1 cup whole milk","¼ cup heavy whipping cream","2 tbsp cilantro, finely chopped (optional)","¾ tsp cumin seeds (optional)","2 tbsp unsalted butter","2 tbsp avocado oil","1 small egg","2 tsp water or milk (for egg wash)"]},
+{n:"Chicken Tikka Club Sandwiches",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1soNYdQ-p8aVGT6V-1nmrRgat7VhbhzXd/view",i:["1 lb boneless skinless chicken breast, cut into bite-sized pieces","2 tbsp Chicken Tikka Masala powder (Shan brand)","1 tsp garlic, crushed","1 tsp ginger, crushed","½ tsp kosher salt","1 tbsp lemon juice","2 tbsp neutral oil","⅓ cup tomato ketchup","2-3 tsp classic yellow mustard","¼–½ tsp ground black pepper","3 large eggs","¼ tsp kosher salt","¼ tsp black pepper","1 tbsp neutral oil","15-18 slices white sandwich bread (3 per sandwich)","Mayonnaise","2-3 Romaine lettuce leaves","½ cucumber, peeled and thinly sliced","1 salad tomato (heirloom or beefsteak), thinly sliced","Toothpicks"]},
+{n:"Chicken Mayo Sandwiches",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1eOfsokJgzi44KDvdpuEe7mP8jKxQ6uak/view",i:["½ lb boneless chicken breast","1 cup vegetable or chicken stock","⅓ cup mayonnaise","3 tbsp sour cream","2 tbsp cream cheese","1½ tsp lemon juice","½ tsp whole grain or Dijon mustard","½ tsp sugar or honey","¾ tsp ground black pepper","½ tsp red chili flakes (optional)","⅓ cup shredded green cabbage","1 green onion, thinly sliced","½ mini cucumber, very finely diced","8-10 slices white or multigrain sandwich bread","Softened salted butter"]},
+{n:"Dilek's Roast Chicken",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1xiFoGoOsO8_v8lAkK3a0v93eIaZEPMPt/view",i:["1 whole chicken, cut into pieces","Small potatoes, skins on","Whole leeks, chopped into 1 inch pieces","Onions, cut into quarters","Whole garlic cloves (not chopped)","1 tbsp olive oil","1 tbsp rosemary","1 tsp lemon juice","Salt and black pepper to taste"]},
+{n:"Nasreen's Chicken",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/12QmloJ4LFvA7rt4CHx_Rta8pP_UHn4Kg/view",i:["1 whole chicken","1 cup plain yogurt","Whole tomatoes, chopped","Whole onions, ground","1 tbsp garlic paste","1 tbsp ginger paste","1 tsp salt","1 tsp red chili","½ tsp turmeric","1 tsp cumin","½ tsp coriander powder"]},
+{n:"Mango Chicken",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1DusyOSDqbVJs6SCoubNlzYm8nJH0GuUA/view",i:["500g chicken","½ whole mango, peeled","1 tbsp yogurt","½ tsp chili powder","1 tbsp coriander powder","1 tsp salt","½ tsp paprika","½ tsp garam masala powder","½ tsp ginger paste","½ tsp garlic paste","2 tbsp oil"]},
+{n:"Chicken Marbella",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1rFNMw1ty0KRI6hd0qkpS4BrrwGUxBIT9/view",i:["1 whole chicken, quartered","¼ cup olive oil","½ cup prunes, pitted","¼ cup green olives","¼ cup capers","½ head garlic, pureed (~6 tsp)","¼ cup red wine vinegar","Dried oregano","1 whole bay leaf","½ cup brown sugar","½ cup white grape juice","Cilantro for garnish"]},
+{n:"Braised Balsamic Chicken",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1c87WQCylPR0qb4Zw9u8fI5pDfM013P8m/view",i:["Skinless boneless chicken breast halves","Ground black pepper to taste","1 tsp garlic salt","2 tbsp olive oil","1 onion, thinly sliced","½ cup balsamic vinegar","1 can (14.5oz) diced tomatoes","1 tsp dried basil","1 tsp dried oregano","1 tsp dried rosemary","½ tsp dried thyme"]},
+{n:"Chicken Cordon Bleu",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1ub5sRcs1eoZZI-djzMs6ZvwCihcc6btN/view",i:["Whole skinless boneless chicken breasts","Swiss cheese slices","Ham slices","All-purpose flour","Paprika","3 tbsp butter","3 tbsp olive oil","½ cup chicken stock","1 tsp chicken bouillon granules","1 tbsp cornstarch","1 cup heavy whipping cream"]},
+{n:"Chicken Pot Pie",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1XXTBxAU0KdhJlkWv-WoTcxA3tfNH22De/view",i:["1 lb skinless boneless chicken breast halves, cubed","1 cup sliced carrots","1 cup frozen green peas","½ cup sliced celery","⅓ cup butter","⅓ cup chopped onion","⅓ cup all-purpose flour","½ tsp salt","¼ tsp black pepper","¼ tsp celery seed","¾ cup chicken broth","⅔ cup milk","2 (9 inch) unbaked pie crusts"]},
+{n:"Chicken Milano",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1FrWVn969HViO1eaNNhzflguzJh7nfg_f/view",i:["1 lb skinless boneless chicken breast","1 tbsp butter","2 tbsp vegetable oil","Garlic cloves, minced","½ cup sun-dried tomatoes in oil, chopped","¾ cup chicken broth + ¼ cup chicken broth (divided)","1 cup heavy cream","8oz dry fettuccini pasta","2 tbsp chopped fresh basil","Salt and pepper to taste"]},
+{n:"Chicken Fettuccine Alfredo",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1Mr0BgQLNvB-hnu9IChBqvSFWAKSIJ3zi/view",i:["1 lb fettuccini pasta","Skinless boneless chicken breast, cubed","Garlic cloves, minced (divided)","1 tbsp Italian seasoning","1 onion, diced","1 package (8oz) sliced mushrooms","⅓ cup all-purpose flour","1 cup half-and-half","¾ cup grated Parmesan cheese","½ cup sour cream","2 cups milk","8oz shredded Colby-Monterey Jack cheese","Roma tomatoes, diced","Butter (divided)"]},
+{n:"Chicken Adobo",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1O6a1FePZD21_l_ok9WuZA8Hp9GnaakwR/view",i:["1 (3 lb) chicken, cut into pieces","2 tbsp vegetable oil","2 tbsp minced garlic","1 tbsp garlic powder","1 tbsp black pepper","1 large onion, quartered and sliced","⅓ cup white vinegar","⅔ cup low sodium soy sauce","1 bay leaf"]},
+{n:"Chicken Nuggets",c:"Chicken",hf:false,u:"https://drive.google.com/file/d/1Gdvpw9FLISyjTYTQ8zuX4nl1VuCKu57I/view",i:["1 lb chicken, cut into bite-sized pieces","1 egg","Seasoned breadcrumbs","½ tsp salt","½ tsp pepper","Oil for frying"]},
+// ── BEEF / LAMB ───────────────────────────────────────────────────────────
+{n:"Pakistani Beef Kofta Curry",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1AKAp_wNPtDXrSHf8zv_xIDd5f_h8banR/view",i:["1 lb ground beef (full fat)","1 small onion, roughly chopped","1 green chili pepper, roughly chopped","¼ cup packed cilantro leaves","1 tbsp mint leaves (optional)","1½ tsp crushed garlic","1 tsp crushed ginger","2 tbsp gram flour (besan)","1 egg, lightly whisked","1 tsp lemon juice","½ tsp cumin powder","½ tsp coriander powder","½ tsp turmeric","½ tsp black pepper","½ tsp red chili powder","½ tsp garam masala","1 tsp kosher salt","1 large onion, roughly chopped (curry)","2 medium tomatoes, roughly chopped (curry)","1 green chili pepper (curry)","¼ cup neutral oil","1 tsp cumin seeds","3 whole cloves","1 inch cinnamon stick","1 bay leaf","1-2 green cardamom pods","4-5 garlic cloves, crushed","½ inch ginger, crushed","3 tbsp plain whole milk yogurt","1 tsp cumin powder (curry)","1 tsp coriander powder (curry)","½–1 tsp red chili powder (curry)","½ tsp turmeric (curry)","¼ tsp paprika (optional)","1½ tsp kosher salt (curry)","2 cups water","¼–½ tsp garam masala","1-2 tbsp cilantro leaves"]},
+{n:"Keema (Instant Pot)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1x6Vogpoyczu7yewlcfethdmSHXKKWzCL/view",i:["1 medium onion","5 garlic cloves","½ inch ginger","¼ cup neutral oil","1 tsp cumin seeds","1-2 small green chili peppers, roughly chopped","1 small to medium tomato, quartered","1 lb ground beef","2 tsp coriander powder","1 tsp cumin powder","½ tsp turmeric","½ tsp red chili powder","¼ tsp red chili flakes (optional)","¼ tsp freshly ground black pepper","1¼ tsp kosher salt","2 tbsp whole milk yogurt","2 tbsp cilantro leaves, finely chopped","½–1 tsp garam masala","½ tsp lemon juice (optional)"]},
+{n:"Keema Matar (Ground Beef with Peas)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1uFLbG72f8kcFMsWYwcADdwO-KdRyrJrg/view",i:["3 tbsp neutral oil","1 tsp cumin seeds","1 medium onion, finely chopped","5-6 garlic cloves, crushed","1 inch ginger, crushed","1 lb ground beef","1 medium ripe tomato, finely chopped","1-2 green chili peppers, chopped","1 tbsp plain whole-milk yogurt","1 tsp ground coriander","¾ tsp mild red chili powder","½ tsp turmeric","1⅛ tsp kosher salt","1 cup frozen green peas, thawed","1 tsp freshly ground black pepper","¼–½ tsp garam masala","¼ cup cilantro leaves, chopped","½ tsp lemon or lime juice"]},
+{n:"Aloo Keema (Ground Beef & Potato)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/10d8KwLorGDpUMJWRLT5iT2vWCHO9iXak/view",i:["⅓ cup neutral oil","1 (2-inch) cinnamon stick","1 tsp cumin seeds","3 whole cloves","½ tsp coriander seeds (optional)","½ tsp whole black peppercorns","1 large onion, finely chopped","5-6 garlic cloves, crushed","1 inch ginger, crushed","1 lb ground beef","1 large tomato, finely chopped","1-2 Serrano or Thai chili peppers, sliced","2 tsp coriander powder","1 tsp cumin powder","¾ tsp turmeric","¼–½ tsp red chilli powder","¼ tsp fresh ground black pepper","1½ tsp kosher salt","2 tbsp plain whole milk yogurt","1 medium to large Russet potato, peeled and cubed","¼ cup water","⅛–¼ tsp garam masala (optional)","½ tsp fresh lemon juice","2 tbsp cilantro leaves"]},
+{n:"Keema Kareley (Ground Beef & Bitter Melon)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/13FWJlbps7eoYUgw2hLVacdMIqAGOp_g4/view",i:["1 medium onion, chopped","3 tbsp olive oil","1 lb ground beef","2-3 small tomatoes, chopped","1 inch ginger, crushed","4-5 garlic cloves, crushed","1-2 green chili peppers, chopped","½ tsp red chilli powder","½ tsp turmeric","1 tsp salt","1 tsp coriander powder","1 tsp cumin powder","½ tsp cumin seeds","1 tbsp plain whole milk yogurt","2 medium Chinese or Indian bitter melons, seeded and chopped","2 tsp salt for prepping bitter melon","Vegetable oil for frying","Juice of ¼ lemon (optional)","Coriander leaves for garnish"]},
+{n:"Keema Lobia (Ground Beef & Black-Eyed Peas)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1My1qHPro-w0N1d8sqBIejyX94xcaP98Q/view",i:["1 medium to large onion, cut into wedges","2 small tomatoes, cut into wedges","5-6 garlic cloves","1 lb ground beef","1 tsp cumin seeds","1½–2 tsp mild red chilli powder","1 tsp coriander powder","½ tsp cumin powder","½ tsp turmeric","1½ tsp salt","¼ cup neutral oil","1–1½ cups cooked black-eyed peas (or 1 can, drained)","½ tsp freshly ground black pepper","½ tsp garam masala","1 green chili or Serrano pepper, finely chopped","1 inch ginger, chopped","2 tbsp cilantro leaves, chopped","½–1 tsp fresh lemon juice (optional)"]},
+{n:"Keema Naan",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1uYeMJGaAwRRCF3i0uT_OoB4u8tTqE1c6/view",i:["3½ cups all-purpose flour","1¼ tsp kosher salt","1½ tsp sugar","1 tsp instant yeast","Scant 1 cup hot water","2 tbsp neutral oil","⅓ cup plain whole milk Greek yogurt","1 lb ground beef (full fat)","1 medium yellow onion, finely chopped","2 Serrano peppers or Indian finger chilies","1 tbsp roughly ground coriander seeds","1½ tsp red chili flakes","1 tsp cumin seeds","¾ tsp cumin powder","¾ tsp garam masala","½ tsp red chili powder","2½ tsp kosher salt","⅓ cup cilantro, finely chopped","Sesame seeds","Nigella seeds (kalonji)","Whole milk for brushing","Melted unsalted butter for topping","Finely chopped cilantro for topping"]},
+{n:"Crispy Keema Samosas",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1yIDyoMkvWq0ot3cuXL03Ai3bf5GSf7mu/view",i:["1 package (12oz) spring roll pastry sheets","2 tbsp neutral oil plus more for frying","1 tsp cumin seeds","1 lb ground beef (full fat)","5-6 garlic cloves, finely chopped","1 inch ginger, finely chopped","1½ tsp coriander powder","1 tsp red chili flakes","¾ tsp red chili powder","½ tsp garam masala","¼ tsp black pepper","1½ tsp kosher salt","1 small yellow onion, diced","2 large Indian finger chilies or Serrano peppers, finely chopped","2-3 green onions, finely chopped","½ cup cilantro","1 small egg","⅓ cup all-purpose flour","¼ cup water"]},
+{n:"Pakistani Seekh Kebab",c:"Beef",hf:false,u:"https://drive.google.com/file/d/13WObuHftlEdJVlIvvPojh46oNc5Xejem/view",i:["2 tsp coriander seeds","2 tsp cumin seeds","½ small yellow onion, roughly chopped","4 small green chili peppers (Thai chili), sliced","¼ cup cilantro leaves","2 tbsp mint leaves","1 lb ground beef (20% fat)","1¼ tsp kosher salt","1 tbsp crushed garlic","¾ tbsp crushed ginger","1 tsp freshly ground black pepper","½ tsp red chili flakes","1 tsp garam masala","1 tsp papaya paste (optional - for extra tender)","Neutral oil for searing"]},
+{n:"Chapli Kabab",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1i8cslDvCa65-7Lk8cqlYRpSbve4FEbj1/view",i:["3 tbsp coriander seeds","1 tbsp cumin seeds","¼ tsp carom seeds (ajwain, optional)","1½–2 tbsp dried pomegranate seeds (anardana)","3 tbsp corn flour or gram flour (besan)","1 lb ground beef (20% fat)","½ medium to large red onion, very finely chopped","2 green onions, finely chopped","2-4 small green chili peppers, finely chopped","3-4 garlic cloves, finely chopped","½–¾ inch ginger, finely chopped","¼ cup cilantro leaves, finely chopped","1 tsp red chili flakes","¼ tsp red chili powder","¼ tsp ground black pepper","1½ tsp kosher salt","1 egg, whisked","1 small Roma tomato, deseeded and very finely diced","Neutral oil for frying"]},
+{n:"Shami Kebab (Instant Pot)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1Nc6-douIpQhtrvfE10PNMwSBOQ8BePyV/view",i:["1 tbsp coriander seeds","2 tsp whole black peppercorns","1 (2-inch) cinnamon stick","1 small black cardamom","2 green cardamom pods","8 whole cloves","1 tsp cumin seeds","1½ lb ground beef (full fat)","1 cup chana dal, soaked at least 1 hour then drained","1 medium to large onion, roughly chopped","8-10 garlic cloves","1½ inch ginger","1 medium bay leaf","½–1 tbsp red chili flakes","1 tsp cumin seeds (second measure)","2–2½ tsp kosher salt","½ tsp chaat masala (optional)","1 small onion, coarsely chopped (filling)","1-2 green chili peppers, sliced (filling)","½ cup cilantro leaves (filling)","2 tbsp mint leaves (filling)","1 small egg, whisked (optional)","1-2 eggs, whisked (for coating)","Neutral oil for frying"]},
+{n:"Mutton Karahi (Restaurant-Style)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1eeumaVAprJ_ruacpOKOJjOM68BT-PVRl/view",i:["1.5 lb bone-in goat or lamb meat","1.5 cups water (to cook meat)","½ tbsp crushed garlic (for cooking meat)","½ tbsp crushed ginger (for cooking meat)","½ small yellow onion, chopped","¼ tsp ground black pepper (for cooking meat)","1 tsp kosher salt (for cooking meat)","⅓–½ cup neutral oil","2 medium Serrano or Indian finger chili peppers, halved","4-5 garlic cloves, finely chopped","½ inch ginger, finely chopped","5 ripe medium Roma or Vine tomatoes, cored and halved","1½ tsp ground coriander","1 tsp cumin powder","1 tsp Kashmiri red chili powder","½ tsp red chili flakes","½ tsp kosher salt","3 tbsp plain whole milk yogurt, whisked","1-2 tbsp salted butter","1 tsp black peppercorns, freshly ground","½ tsp lemon juice","3-4 small Thai green chili peppers, slit","1 tbsp julienned ginger","2 tbsp cilantro, finely chopped"]},
+{n:"Mutton Korma (Lamb Korma)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1jNDDoX7dXjB_JlQSQH6ferBjKJ5C6Y5y/view",i:["⅓–½ cup neutral oil","1 medium dried bay leaf","3 whole cloves","2 green cardamom pods","1 lb 2oz bone-in goat or lamb, cut into 1-2 inch pieces","6 garlic cloves, crushed","1 inch ginger, crushed","1 small green chili pepper, finely chopped","2 tsp Kashmiri chili powder","1½ tsp coriander powder","¾ tsp cumin powder","½ tsp red chili powder","¼ tsp turmeric","⅛ tsp garam masala","1 tsp kosher salt","⅔ cup pre-fried onions","½ cup plain whole milk yogurt, whisked","3 whole cloves (second measure)","⅛ piece small nutmeg pod","2 blades mace (javitri)","1 small black cardamom pod","4 green cardamom pods","¾ tsp cumin seeds (preferably toasted)","2 tbsp heavy whipping cream","1½ tsp kewra water","10-12 raw almonds","Julienned ginger for serving"]},
+{n:"Mutton Pulao (Goat/Lamb)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1TrRUQimINfkkYwkZm_mFT2g7oYuZWpnF/view",i:["1 lb bone-in goat or lamb, cut into ~2 inch pieces","½ small yellow onion, roughly chopped (broth)","½ tbsp cumin seeds (broth)","½ tbsp coriander seeds (broth)","½ tbsp black peppercorns (broth)","1 (2-inch) cinnamon stick (broth)","1 medium dried bay leaf (broth)","3 green cardamom pods (broth)","1 black cardamom (broth)","4 whole cloves (broth)","2 tsp kosher salt (broth)","1½ cups aged basmati rice","¼ cup neutral oil","2 tbsp unsalted butter or ghee","1 medium yellow onion, quartered and thinly sliced","¾ tsp cumin seeds","½ tsp whole black peppercorns","4 whole cloves","1 black cardamom","5 garlic cloves, crushed","¾ inch ginger, crushed","½ tsp kosher salt","1 medium Serrano pepper","2 tbsp plain whole-milk yogurt, whisked","3 tbsp cilantro leaves, finely chopped","1 tbsp mint leaves (optional)"]},
+{n:"Aloo Gosht (Lamb & Potato Curry)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/11A6ItRHJjAnBgIaAguMA8iRDtfiARy9K/view",i:["¼ cup neutral oil","1 tbsp ghee","1–1.2 lb bone-in goat or lamb","1¾ tsp kosher salt (divided)","6-7 garlic cloves, crushed","1 inch ginger, crushed","1 medium yellow onion, finely chopped","2 small Roma tomatoes, pureed","1-2 small green chili peppers, chopped","2 green cardamom pods","3 whole cloves","½ tsp cumin seeds","1.5–2 tsp coriander powder","½–1 tsp cumin powder","½ tsp red chili powder","½ tsp turmeric","¼ tsp ground black pepper","1 tbsp plain whole-milk yogurt","2 small russet potatoes, peeled and cubed","½ tsp garam masala","2 tbsp cilantro leaves, chopped"]},
+{n:"Gobi Gosht (Lamb & Cauliflower)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1jra78hIBaWPgxXdIwk_UmYsuB0b3_VqI/view",i:["1.25 lb bone-in goat or lamb meat","6 garlic cloves, crushed","1¼ inch ginger, crushed","1 medium yellow onion, finely chopped","2 small ripe Roma or Vine tomatoes, finely chopped","½ Serrano or 1 Thai green chili, roughly chopped","1 tsp cumin seeds","2 green cardamom pods","2 whole cloves","1½ tsp coriander powder","1 tsp cumin powder","¾ tsp red chili pepper","½ tsp turmeric","1¾ tsp kosher salt","⅓ cup neutral oil","1 small head cauliflower, cut into 1 inch pieces","1-2 small green chili peppers (optional)","¼ tsp kosher salt (for cauliflower)","½–¾ tsp freshly ground black pepper","¼ tsp garam masala","3 tbsp cilantro leaves, finely chopped","1 tsp freshly squeezed lemon juice","Pat of butter (optional)"]},
+{n:"Pakistani Beef Stew (Instant Pot)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1TO6xo_u8ST7ivDW4U_eDCfIUPt9w6TVf/view",i:["1 lb beef stew meat, cubed","2 tbsp white vinegar","1 large yellow onion, chopped","¼ cup neutral oil","6 garlic cloves (whole)","8 dried button red chili peppers","2 tsp coriander seeds","1 tsp cumin seeds","¼ tsp whole cloves","¼ tsp whole black peppercorns","1 inch cinnamon stick","2 whole green cardamom pods","1-2 whole black cardamom pods","½ tsp turmeric","1¼ tsp kosher salt","¾–1 cup plain whole milk yogurt","1 inch ginger, crushed","2 tbsp whole raw almonds","1 tbsp cilantro for garnish"]},
+{n:"Haleem (Instant Pot)",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1kATVyCeMmn9AZASz07dkeXZYgBhWwhxC/view",i:["¼ cup chana dal","¼ cup maash dal (split urad lentils)","2 tbsp masoor dal (red split lentils)","2 tbsp split moong dal","2 tbsp basmati rice","2 tbsp pearl barley (optional)","2 small dried bay leaves","1 black cardamom pod","1-2 inch cinnamon stick","1 tsp cumin seeds","1-2 green cardamom pods","2 whole cloves","1 large yellow onion","6 garlic cloves","1 inch ginger","¼ cup neutral oil","2 tbsp ghee","1 lb beef stew meat, cubed","1-2 small tomatoes, quartered","1-2 green chili peppers, sliced","1 tbsp haleem masala powder","1-2 tsp red chili flakes","¾ tsp turmeric","2½–2¾ tsp sea salt","2 tbsp whole milk yogurt","3 cups water","¼ cup rolled oats","½ tsp garam masala or chaat masala","¼ tsp freshly ground black pepper","Garnish: fried onions, julienned ginger, green chilies, lemon, cilantro"]},
+{n:"Mongolian Beef",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1PY05bs-N39ddEnzY3lxX-JV0Mvag6J8h/view",i:["1 lb beef flank steak, very thinly sliced","1 tbsp cornstarch (marinade)","1 tbsp gluten-free soy sauce (marinade)","2 tsp rice vinegar (marinade)","¼ cup gluten-free soy sauce (sauce)","2½ tbsp tightly packed brown sugar","1 tbsp cornstarch (sauce)","1 tbsp gluten-free oyster sauce","1 tsp sesame oil","½ tsp ground black pepper","½–1 tsp red chili flakes","¼ tsp sea salt","½ cup water","4 tbsp neutral oil (divided)","½ onion, finely chopped","3-4 garlic cloves, crushed","½ inch ginger, crushed","4 green onions, cut into 2-inch strips diagonally","Sesame seeds for garnish (optional)","White rice for serving"]},
+{n:"Steak Fajitas with Fresh Lime",c:"Beef",hf:false,u:"https://drive.google.com/file/d/1Yixir33-GZ7WpUZ9YT4nbWuNImbfyLZX/view",i:["12oz skirt steaks, each halved","4 large garlic cloves","1 tsp liquid smoke","Juice of 4 limes","1 large onion, halved and thinly sliced","1 tbsp ground cumin","2 tbsp olive oil","1 whole bell pepper","Salt and pepper to taste","Flour or corn tortillas"]},
+// ── FISH ──────────────────────────────────────────────────────────────────
+{n:"Salmon Tikka (Fish Tikka)",c:"Fish",hf:false,u:"https://drive.google.com/file/d/13WJQYw3jJKFzCOTkY4GKxY5jMVzeuZ6L/view",i:["1–1.25 lb skinless salmon, cut into 1.5 inch pieces","⅓ cup plain whole-milk Greek yogurt","2 tbsp olive oil","1½ tbsp lemon or lime juice","3 garlic cloves, minced","1 tsp paprika or Kashmiri chili powder","1 tsp coriander powder","1 tsp cumin powder","½ tsp black pepper","½ tsp red chili powder or cayenne","¾ tsp fine sea salt","2 tbsp minced parsley or cilantro leaves","Red or yellow onion rings for serving (optional)"]},
+{n:"Spicy Baked Salmon with Tomato Masala",c:"Fish",hf:false,u:"https://drive.google.com/file/d/10Tgu6hujzqhIbngVngk4ST-c9r4NRDIj/view",i:["2 tbsp olive oil","1 bay leaf","1 medium onion, finely chopped","4 medium tomatoes, finely chopped","1 green chili pepper, slit","½ tsp dried oregano or Italian herbs","½ tsp paprika","¼ tsp ground thyme","¼ tsp cumin powder","¼ tsp coriander powder","¼ tsp red chili powder","⅛ tsp black pepper","⅛ tsp red chili flakes","1 tbsp parsley, chopped","Dash garlic powder (optional)","1 tsp salt","1 lb salmon","½ lemon, juiced"]},
+// ── VEGETABLES ────────────────────────────────────────────────────────────
+{n:"Masoor Dal (Red Lentil Dal)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1ASwMfYBQ3vY2gcFr02jtP-O2FeINuJTj/view",i:["1 cup masoor dal (red split lentils)","¼ cup neutral oil","1 tsp cumin seeds","1 small to medium yellow onion, finely chopped","4-5 garlic cloves, crushed","½ inch ginger, crushed","2 small Roma or Vine tomatoes, finely chopped","1 small green chili (Thai or Serrano), chopped","1 tsp cumin powder","1 tsp coriander powder","¼–½ tsp red chili powder","½ tsp turmeric","1⅛ tsp sea salt","1 tbsp ghee or butter","1 tsp kasuri methi (optional)","1 tsp freshly squeezed lemon juice","1-2 tbsp chopped cilantro","¼ tsp garam masala (optional)"]},
+{n:"Moong Dal (Yellow Lentils)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1CUDZvfFfUyAJXHfJDZeauUvoUdglqVTx/view",i:["⅔ cup moong dal (split and skinned mung beans)","⅓ cup masoor dal (red lentils)","3 cups chicken or vegetable stock","2 cups water","4 garlic cloves, crushed","½–¾ tsp red chili powder","½ tsp turmeric","½ tsp cumin powder","½ tsp red chili flakes","1¼ tsp kosher salt","2 tbsp heavy cream or ¼ cup whole milk","2 tbsp neutral oil","2 tbsp ghee","1 tsp cumin seeds","3-4 dried red chiles","1 medium to large green chili pepper","2 garlic cloves, thinly sliced","½ tsp Kashmiri chili powder or paprika","¼ tsp garam masala","2-3 tbsp cilantro leaves, finely chopped","1 tsp lemon juice"]},
+{n:"Instant Pot Red Lentil Dal",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1BxsB6Dsq4PrVLCO3kK_iOyKIjGigRFUv/view",i:["½ cup masoor dal (red lentils)","1 small yellow onion","2-3 garlic cloves","1 tsp crushed ginger","½ medium tomato","½ tbsp ghee or butter","Cilantro for garnish","2 tbsp neutral oil"]},
+{n:"Chana Dal (Restaurant-Style)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1P2EwFRXD1xUqN9iMF3rNXtlfp2WYaNXt/view",i:["1 cup chana dal, soaked at least 1 hour","1 tbsp kosher salt (for boiling)","2-3 tbsp neutral oil","1 tsp cumin seeds","1 small yellow onion, finely chopped","4-5 garlic cloves, crushed","¾ inch ginger, crushed","½ tsp coriander powder","½ tsp red chili powder","¼ tsp turmeric","¼ tsp cumin powder","1 tsp kosher salt","1 ripe Roma or Vine tomato, pureed","1 cup water","4 tbsp neutral oil (tarka)","2 tbsp salted butter or ghee (tarka)","2 small Serrano or Indian green chili peppers, sliced diagonally","5 whole dried red chili peppers (dundicut)","2 tbsp julienned ginger","¼ cup cilantro, finely chopped","1-2 tsp lemon juice","¼ tsp garam masala"]},
+{n:"Instant Pot Chana Dal",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/14vYaKWXP0jEQkSmkYxIue7dyLdQbqLA5/view",i:["¾ cup chana dal, rinsed and drained","2 cups water","1 small to medium tomato, finely chopped","1 tsp kosher salt","½ tsp coriander powder","¼ tsp turmeric","¼ tsp cumin powder","¼ tsp red chili powder","⅛ tsp ground black pepper","2 tbsp ghee","1 tbsp oil","1 tsp cumin seeds","1 small yellow onion, thinly sliced","3 garlic cloves, crushed","1 small green chili pepper, chopped","¼ tsp garam masala","¼ tsp lemon juice","½ inch ginger, julienned","2 tbsp cilantro leaves, chopped"]},
+{n:"Whole Masoor Dal (Brown Lentil Curry)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1h44QuXao3caVGWCIOl5ojYjwTMZZu5RD/view",i:["1 cup whole masoor dal (brown lentils), rinsed","5 cups water","1 small tomato, finely chopped (optional but recommended)","4-5 garlic cloves, crushed","½ tbsp crushed ginger","1 tsp coriander powder","½ tsp cumin powder","¼–½ tsp red chili powder","¼ tsp turmeric","1½ tsp kosher salt","1 small green chili pepper, sliced","¼ tsp ground black pepper","3-4 tbsp neutral oil","2 tbsp ghee or butter","½–1 tsp cumin seeds","1 small yellow onion, quartered and thinly sliced","¼ tsp garam masala","1 tsp lemon or lime juice","2 tbsp cilantro or mint leaves, chopped"]},
+{n:"Pakistani Urad Dal (Maash Ki Dal)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1_QnOExpjGbvxVS21RSCGTFJ2j_fUW3bK/view",i:["1 cup urad (maash) dal (split and husked black gram lentils)","1 medium onion, cut into quarters","1 small to medium tomato, cut into quarters","5-6 garlic cloves","⅓ cup neutral oil","2 whole cloves","1½ tsp coriander powder","1 tsp cumin powder","1–1½ tsp Kashmiri red chili powder","¼–½ tsp red chili powder","½ tsp turmeric","½ tsp black pepper powder","1¼ tsp kosher salt","1-2 green chili peppers, finely chopped","1 tbsp julienned ginger","1-2 tbsp cilantro leaves, finely chopped","½ tsp lemon or lime juice (optional)"]},
+{n:"Rajma (Red Kidney Bean Curry)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1vQyQKcScNoud3shKT63mvQv89RITbh3V/view",i:["1 cup dried dark red kidney beans (or 2 cans, drained)","¼ cup neutral oil","1 medium yellow onion, very finely chopped","1 tsp cumin seeds","1 small dried bay leaf","1 inch piece cinnamon stick","8 black peppercorns (optional)","1 small black cardamom (optional)","4-5 garlic cloves, crushed","1 inch ginger, crushed","2 medium Roma or Vine tomatoes, pureed","2 tbsp tomato paste","1 tsp coriander powder","1 tsp Kashmiri chili powder or paprika","⅓ tsp turmeric","¼ tsp red chili powder","1¾ tsp kosher salt","2 cups water","2-3 small Thai or Serrano chili peppers","2-3 tbsp heavy whipping cream","1 tbsp salted butter","½ tbsp dried fenugreek leaves (kasuri methi)","¼ tsp garam masala","2 tbsp cilantro, finely chopped","Sliced red onions and lemon wedges for serving"]},
+{n:"Khichdi",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1Pq6nBEOnqt6AbTxW1rC3J20etAPUjbAt/view",i:["1 cup aged basmati rice","½ cup split moong dal","¼ cup neutral oil","1 small yellow onion, quartered and thinly sliced","3-4 garlic cloves, crushed","¾ inch ginger, crushed","1½ tsp cumin seeds","2 cups vegetable or chicken broth","3 cups water","1 tsp ground black pepper","¼ tsp turmeric","1¾ tsp kosher salt","Salted butter for serving","Plain whole-milk yogurt for serving"]},
+{n:"Chana Masala (Chickpea Curry)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1NLpU-ePaWlAgfDzAw6vQrLtsyY8H6aoq/view",i:["¼ cup neutral oil","1 tsp cumin seeds","1 medium yellow onion, finely chopped","5 garlic cloves, crushed","1 inch ginger, crushed","1 small green chili pepper, sliced","2 tsp coriander powder","1 tsp cumin powder","1 tsp paprika or Kashmiri chili powder","½ tsp turmeric","¼ tsp red chili powder","2 medium tomatoes, finely chopped or pureed","2 cans (15oz each) chickpeas, rinsed and drained","1¼ tsp sea salt","¼ tsp baking powder (optional)","2 cups water","½ tsp garam masala or chaat masala","1 tsp freshly squeezed lemon juice","2-3 tbsp cilantro leaves, chopped","Julienned ginger for garnish (optional)"]},
+{n:"Matar Paneer",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1DLf7pR0wnkCxwH1BNnBjE0l4qVtgavUE/view",i:["¼ cup neutral oil","1 large onion, finely chopped","5 garlic cloves, finely chopped","1 inch ginger, finely chopped","2 tbsp tomato paste","3 ripe Vine or Roma tomatoes, pureed","1 small Serrano or Thai green chili pepper, roughly chopped","1 green cardamom pod","2 tsp coriander powder","1 tsp Kashmiri chili powder or paprika","¾ tsp cumin powder","½ tsp turmeric","½ tsp red chili powder","1½ tsp kosher salt","1 cup water","1½ tbsp ghee or butter","8oz paneer, cut into ½ inch cubes","¼ tsp sugar (optional)","1¼ cup frozen green peas, thawed","¼ cup heavy whipping cream","⅛–¼ tsp garam masala","½ tsp dried methi (fenugreek leaves)","3 tbsp cilantro, finely chopped"]},
+{n:"Palak Paneer (Restaurant-Style)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1tIV3MMQ0IrSfAadhVc6QaI3X83C8I0cQ/view",i:["¼ cup neutral oil","1 tsp cumin seeds","1 medium yellow onion, finely chopped","5 garlic cloves, finely chopped","1 inch ginger, finely chopped","1-2 small Serrano or Thai green chili peppers, finely chopped","2 ripe Vine or Roma tomatoes, pureed","1½ tsp coriander powder","1 tsp cumin powder","½ tsp turmeric","½–¾ tsp red chili powder","1½ tsp kosher salt","1 lb fresh spinach, washed and stems removed","2 tbsp ghee or butter","½ cup water","8oz paneer, cut into ½ inch cubes","¼ cup + 2 tbsp heavy whipping cream","¼ cup + 2 tbsp whole milk","½ tbsp dried fenugreek leaves (methi)","1 tsp lemon juice","¼ tsp garam masala (optional)"]},
+{n:"Alavia's Paneer",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1M0qeEmpGhPSWK777jIGe-1VMP13neAGH/view",i:["2 packets frozen Amul paneer","3 medium tomatoes, cut up","1 tsp ginger paste","1 tsp garlic paste","Salt to taste","Fresh coriander (cilantro)","Small amount tamarind paste","Fresh green chilies"]},
+{n:"Aloo Gobi (Cauliflower & Potato Curry)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1YgLRnJi6K4SZiqm2XdsjLvkjSQZpi9HX/view",i:["¼ cup neutral oil","1 tsp cumin seeds","1 medium yellow onion, finely chopped","5 garlic cloves, crushed","¾–1 inch ginger, crushed","2-3 small tomatoes, finely chopped","2 tsp coriander powder","1 tsp cumin powder","½ tsp turmeric","¼–½ tsp red chili powder","¼ tsp ground black pepper","1¼ tsp salt","1 small head cauliflower, cut into small florets","2 small Russet potatoes, peeled and cubed","1 small green chili pepper, sliced","½ tsp garam masala","½–1 tsp soy sauce (optional)","1 tsp lemon or lime juice","2 tbsp chopped cilantro leaves"]},
+{n:"Aloo Palak (Spinach & Potato)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1nB7hd5tKM1NkQhmoN7nccKeR-4RrpWJE/view",i:["1 lb organic spinach, fresh or frozen","1 large Russet potato, peeled and cubed","¼ cup neutral oil","1 tbsp ghee or butter (optional)","1 tsp cumin seeds","1 medium onion, finely chopped","1-2 green chili peppers, slit in half","3-4 garlic cloves, crushed","½ inch ginger, crushed","1 medium to large tomato, finely chopped","1 tsp coriander powder","½ tsp cumin powder","¼–⅓ tsp turmeric","¼ tsp red chili powder","¾–1 tsp salt","¼ tsp garam masala (optional)","1 tsp lemon or lime juice"]},
+{n:"Aloo Baingan (Eggplant & Potato)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1lgfn_5MpaMH6yiJLFzDxUWFjaHpD5Em4/view",i:["1 small to medium globe eggplant, unpeeled and cubed","¼ cup neutral oil plus more for frying eggplant","1 tsp cumin seeds","1 medium yellow onion, finely chopped","6-7 garlic cloves, crushed","1 inch ginger, crushed","2 medium tomatoes, finely chopped","1 small green chili pepper, sliced","1 tsp coriander powder","1 tsp cumin powder","¼–½ tsp red chili powder","½ tsp turmeric","½ tsp ground black pepper","2 tsp kosher salt","2 medium Russet potatoes, peeled and cubed","2 tbsp cilantro leaves, finely chopped","¼ tsp garam masala or chaat masala (optional)","1 tsp lemon juice"]},
+{n:"Aloo Matar (Potato & Peas)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1lra1DDjU1sa-G6EAi6Aj2_5J2NrBapAA/view",i:["¼ cup vegetable oil","2 medium onions, finely chopped","2 large potatoes, peeled and chopped","1 cup frozen peas","1 tsp salt","1 tsp turmeric","1 tsp chili powder","1 tsp cumin seeds"]},
+{n:"Bhindi Fry (Indian-Style Okra)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1ATkEOGbPs3Xt22Hic2cWFgj9z2iG6h7p/view",i:["3 tbsp neutral oil","1 tsp carom seeds (ajwain)","1 tsp nigella seeds (kalonji, optional)","¼–½ tsp red chili powder","¼ tsp ground turmeric","1 large Indian green chili or small Serrano chili, sliced","1 lb whole okra, tips removed and sliced","1 tbsp coriander powder","½ tsp fennel seeds (saunf)","¾ tsp kosher salt","½ tsp dry mango powder (amchur) if available"]},
+{n:"Zucchini Curry (Toriyan)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1eNeFR24ewOTx7_vz9IffyPa2vOFLvF9B/view",i:["⅓ cup neutral oil","2 medium onions, thinly sliced","5-6 garlic cloves, crushed","1 inch ginger, crushed","1 tsp cumin seeds","1 medium tomato, cubed","1 tsp salt","½ tsp coriander powder","½ tsp black pepper powder","½ tsp red chili powder","3 large green zucchini (~1–1¼ lb), peeled and cut into half-moons","1 small green chili pepper, sliced","½ tsp turmeric","¼ cup chopped cilantro for garnish"]},
+{n:"Mixed Vegetable Curry",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1hrF7pbDAS-epFSNs2FpeRC3dbY6ie99b/view",i:["3 tbsp olive oil","1 small to medium onion, finely chopped","4 garlic cloves, crushed","½ inch ginger, crushed","1 medium tomato, chopped","1 small green chili pepper, chopped","3-4 small carrots, peeled and sliced","1 cup frozen peas","1 large Russet potato, peeled and cubed","½ tsp cumin seeds","½ tsp coriander powder","½ tsp cumin powder","½ tsp turmeric","¼ tsp red chili powder","¾ tsp salt","1 tbsp dried fenugreek leaves (kasuri methi)","1 tbsp cilantro leaves, chopped (optional)"]},
+{n:"Crispy Pakora",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1VOiXvkIONaIaFNPvHOictJjY-oJC0v5m/view",i:["1 large yellow onion, thinly sliced","1 medium Russet potato, peeled and thinly sliced","1 cup red or green cabbage, thinly sliced","2 Serrano peppers, finely chopped","½ cup cilantro, finely chopped","2 tsp red chili flakes","½ tsp red chili powder","1 tbsp coriander seeds, roughly crushed","2 tsp cumin seeds, roughly crushed","1 tbsp neutral oil","1 tbsp lemon juice","2 tsp sea salt","1¼ cup besan (gram flour)","½ cup + 1 tbsp chilled water","⅛ tsp baking soda (optional)","Oil for frying","Chaat masala for sprinkling (optional)"]},
+{n:"Crispy Aloo Tikki (Potato Cutlets)",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1VjzI5hb4V_SuEoOxRrYkAdGrP61zIbNa/view",i:["3 large Russet potatoes","1 small yellow or red onion, roughly chopped","1-2 Serrano or Thai chili peppers, deseeded and roughly chopped","2 tbsp cilantro leaves","1-2 tbsp mint leaves","1¾ tsp kosher salt","2 tsp roughly ground coriander seeds","½ tsp cumin seeds","½ tsp black pepper","½–1 tsp red chili flakes","½ tsp cumin powder","¼–½ tsp chaat masala or amchur powder","⅛–¼ tsp red chili powder","1 tsp lemon juice","¼ cup neutral oil","1-2 eggs, whisked","½ cup breadcrumbs (optional)"]},
+{n:"Kachumber Salad",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/1kAFeuadjxR3DPuVxLuTgiYVUyN97ERZx/view",i:["1 medium Roma or vine tomato, diced","½ regular cucumber or 1 mini (Persian) cucumber","¼ medium red onion, diced","2 tbsp cilantro leaves, finely chopped","½–1 tbsp fresh lemon or lime juice","¼ tsp fine sea salt","¼ tsp ground black pepper"]},
+{n:"Vegetable Raita",c:"Vegetables",hf:false,u:"https://drive.google.com/file/d/12zUZh7uAsZu1lYB5MWYgg1c8W7Q-l9T5/view",i:["1 cup plain whole milk yogurt","¼ cup whole milk","½ tsp cumin seeds (toasted or regular)","¼ tsp cumin powder","¼ tsp ground black pepper","¼ tsp red chili flakes","⅛ tsp chaat masala (optional)","¼ tsp sugar","Scant ½ tsp sea salt","1 small Persian/mini cucumber, very thinly sliced","¼ small onion, very thinly sliced","½ small Roma or Vine tomato, finely diced","2-3 tbsp cilantro leaves, finely chopped"]},
+// ── RICE ──────────────────────────────────────────────────────────────────
+{n:"Perfect Basmati Rice (Rice Cooker)",c:"Rice",hf:false,u:"https://drive.google.com/file/d/1q1W3wXhxHt2UR_XN1Zw1uNtc9AvHmVaz/view",i:["1 cup aged long-grain basmati rice","1¾–2 cups water","1 tbsp oil","¾–1 tsp kosher salt"]},
+{n:"Matar Pulao (Peas Pulao)",c:"Rice",hf:false,u:"https://drive.google.com/file/d/1k9KugF1Qby5BXZLb7u_qAwlMCi1uW_RM/view",i:["1½ cups aged basmati rice","2 tbsp neutral oil","1 tbsp ghee or butter","1 small yellow onion, thinly sliced","3 garlic cloves, crushed","¾ inch ginger, crushed","1 small dried bay leaf","1 tsp coriander seeds, roughly crushed","1 tsp cumin seeds","1 black cardamom","1 inch cinnamon stick","1 small Roma tomato, finely chopped","1 small green chili pepper (optional)","½ tsp garam masala","¼ tsp ground black pepper","2¼ tsp kosher salt","1 cup frozen green peas","2¾ cups water","Chopped cilantro for garnish (optional)"]},
+{n:"Chana Pulao (Chickpea Pilaf)",c:"Rice",hf:false,u:"https://drive.google.com/file/d/1T7IC7PeE2qa7S8XCxl8d0D4kQ_xoNbDp/view",i:["1½ cups aged basmati rice","2 tbsp neutral oil","1 tbsp ghee","1 medium onion, thinly sliced","3 garlic cloves, crushed","⅓ inch ginger, crushed","½–1 Serrano or Thai green chili, sliced (optional)","2 small dried bay leaves","½ tsp whole black peppercorns","1 inch cinnamon stick","1 black cardamom","5 whole cloves","1 tsp cumin seeds","1 can (15oz) chickpeas, drained and rinsed","2 tsp sea salt","3 cups water","Cilantro for garnish (optional)"]},
+{n:"Indo Chinese Fried Rice",c:"Rice",hf:false,u:"https://drive.google.com/file/d/1CuckBGt_u-RT_eFTOWdoMQCjudpsrMln/view",i:["1¼ cup aged basmati rice","1½–2 tsp oyster sauce","1 tsp chili garlic sauce (desi style)","½ tsp soy sauce","¼ tsp sesame oil","1 egg","3 tbsp + 1 tsp neutral oil","4 garlic cloves, finely chopped","½ inch ginger, finely chopped","6oz chicken breast, cut into mini bite-sized pieces","1 tsp soy sauce (for chicken)","1 tsp chicken powder or MSG","½ tsp ground black pepper","¼ tsp ground white pepper","1½ cups green cabbage, thinly sliced","½ cup frozen green peas, thawed","½ cup carrot (1 large), peeled and diced into ¼ inch cubes","2 green onions, finely chopped"]},
+{n:"Jaggery Rice (Gur Wale Chawal)",c:"Rice",hf:false,u:"https://drive.google.com/file/d/1RmveYPhgGxzLTciFN-0oCo87KNngID4V/view",i:["1 cup aged basmati rice","1½ tbsp unsalted butter","1 tbsp ghee","5-6 green cardamom pods","1 medium bay leaf","185g jaggery (gur), broken into chunks","Malai/cream or crème fraiche for serving (optional)","Cashews, slivered almonds or raisins for garnish (optional)"]},
+{n:"Zarda (Sweet Rice)",c:"Rice",hf:false,u:"https://drive.google.com/file/d/1ICPsCttd7ym1h3V7nVfvq_WeDGB4uX4-/view",i:["1 cup aged basmati rice","2 tbsp ghee or butter","4-5 green cardamom pods, slightly cracked open","¼ cup water","⅓ cup whole milk","¾ cup raw cane sugar or white sugar","⅛ tsp yellow or orange food color","¼ tsp kosher salt","¼ tsp orange blossom water or kewra essence (optional)","Malai or thick cream for serving (optional)","Slivered almonds for garnish (optional)"]},
+// ── BREAD ─────────────────────────────────────────────────────────────────
+{n:"Roti / Chapati",c:"Bread",hf:false,u:"https://drive.google.com/file/d/1_WionT1DtxU8m07z1p1kwtbdkKpZ3Y5H/view",i:["2 cups atta flour (durum wheat flour) plus more for dusting","¼–½ tsp sea salt","1 cup room temperature water (more as needed)","Unsalted butter or ghee for brushing (optional)"]},
+// ── DRINKS ────────────────────────────────────────────────────────────────
+{n:"Masala Chai",c:"Drinks",hf:false,u:"https://drive.google.com/file/d/1btTognAsNUF8uW8ZK6-KhWgULn6-GZ-z/view",i:["2¼ cups filtered water","1 (3-inch) cinnamon stick","3 whole cloves","4 green cardamom pods, cracked open","3 black peppercorns","½ tsp fennel seeds (optional)","½ inch fresh ginger, thinly sliced","3 black tea bags or 3 tsp loose leaf black tea","1 cup whole milk","4 tsp turbinado or raw cane sugar"]},
+{n:"Pineapple Agua Fresca",c:"Drinks",hf:false,u:"https://drive.google.com/file/d/1BhHicIO4aOHyJ3HOmGiVKTCuAjHDpYPg/view",i:["2-3 cups fresh or canned pineapple","2-3 cups cold water","1 tbsp fresh lime juice","¼ cup sugar (or to taste)","1 cup ice"]},
+// ── DESSERT ───────────────────────────────────────────────────────────────
+{n:"Sooji ka Halwa (Semolina)",c:"Dessert",hf:false,u:"https://drive.google.com/file/d/1A2E4oopxF8hyIXUZlS0k3O4c603qoEv8/view",i:["½ cup unsalted butter or ghee","1 cup fine semolina (sooji)","2½ cups water","¾ cup raw cane sugar or turbinado sugar","4-5 cardamom pods, slightly cracked open","½ tsp rose water","Pinch saffron strands (optional)","1-2 tbsp slivered almonds for garnish (optional)"]},
+{n:"Easy Ras Malai",c:"Dessert",hf:false,u:"https://drive.google.com/file/d/1k8ezFF32WV0FOTxhbB-nMTVEIOwrCAh_/view",i:["4½ cups whole milk","1 can (12oz) evaporated milk","¼ cup + 1 tbsp sugar","3-4 cardamom pods, slightly cracked open","Small pinch saffron strands (optional)","1 cup whole milk powder","2 tsp all-purpose flour","1 tsp baking powder","Pinch fine ground cardamom powder","2 tsp ghee","2 tsp neutral oil","1 small egg, whisked","Finely chopped pistachios for garnish","Finely chopped blanched almonds for garnish"]},
+{n:"Crushed Pineapple Dessert",c:"Dessert",hf:false,u:"https://drive.google.com/file/d/1WtfFeqW_66g7QXQen282EChw1iKtUlUh/view",i:["2 tsp unflavored powdered gelatin","3 tbsp water","1 cup heavy whipping cream","¾–1 cup sweetened condensed milk","2 tbsp freshly squeezed lemon juice","1 can (20oz) crushed pineapple in heavy syrup, drained","12-15 Biscoff cookies (or cookies of choice)"]},
+{n:"Umm Ali",c:"Dessert",hf:false,u:"https://drive.google.com/file/d/169NcUoJabI4epCjwjZ8QboCGGrD8imy2/view",i:["1 whole puff pastry","1 litre whole milk","Sugar to taste","Assorted nuts","1 can Nestle cream","Pistachios for garnish","Butter (optional, dotted on cream surface)"]},
+{n:"Sugar Cookies",c:"Dessert",hf:false,u:"https://drive.google.com/file/d/1V62OpJ0iFSSrzkuU_piVsp9JrAf3scse/view",i:["2 cups all-purpose flour","1 cup butter","1 cup sugar","1 egg","1 tsp vanilla"]},
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAB NAVIGATION
+// ═══════════════════════════════════════════════════════════════════════
+function openTab(id){
+  document.querySelectorAll('.tab-section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('#main-nav button').forEach(b=>b.classList.remove('active'));
+  const s=document.getElementById('tab-'+id);if(s)s.style.display='block';
+  const btns=[...document.querySelectorAll('#main-nav button')];
+  const btn=btns.find(b=>b.getAttribute('onclick')==="openTab('"+id+"')");
+  if(btn)btn.classList.add('active');
+  if(id==='plan')renderPlan();
+  if(id==='cook')renderCook();
+  if(id==='shop')renderShopping();
+  if(id==='fridge')renderFridge();
+  if(id==='freezer')renderFreezerList();
+  if(id==='diary')renderDiary();
+  if(id==='ideas')renderIdeas();
+  if(id==='recipes')renderRecipes();
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════════════════
+function openModal(id){
+  document.getElementById(id).style.display='flex';
+  if(id==='modal-leftover')document.getElementById('lo-date').value=todayISO();
+  if(id==='modal-freezer')document.getElementById('fz-date').value=todayISO();
+  if(id==='modal-dinner'){document.getElementById('din-date').value=todayISO();}
+}
+function closeModal(id){document.getElementById(id).style.display='none';}
+function closeModalOutside(e,id){if(e.target===e.currentTarget)closeModal(id);}
+function setSrc(btn,fieldId){
+  const parent=btn.parentElement;
+  parent.querySelectorAll('.src-btn').forEach(b=>{b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById(fieldId).value=btn.getAttribute('data-src');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SEARCHABLE PICKER
+// ═══════════════════════════════════════════════════════════════════════
+let pickerTarget=null;// {fieldId, displayId, mode, callback}
+
+function openPicker(fieldId,mode,callback){
+  pickerTarget={fieldId,displayId:fieldId+'-display',mode,callback};
+  document.getElementById('picker-title').textContent='Pick a dish';
+  document.getElementById('picker-search').value='';
+  buildPickerList('');
+  document.getElementById('picker-overlay').style.display='flex';
+  setTimeout(()=>document.getElementById('picker-search').focus(),100);
+}
+
+function openAssignPicker(){
+  const type=document.getElementById('assign-type').value;
+  if(type==='fridge'){
+    // show fridge items
+    pickerTarget={fieldId:'assign-dish',displayId:'assign-dish-display',mode:'fridge',callback:null};
+    document.getElementById('picker-title').textContent='Pick from fridge';
+    document.getElementById('picker-search').value='';
+    buildPickerList('');
+    document.getElementById('picker-overlay').style.display='flex';
+    setTimeout(()=>document.getElementById('picker-search').focus(),100);
+  } else if(type==='freezer'){
+    pickerTarget={fieldId:'assign-dish',displayId:'assign-dish-display',mode:'freezer',callback:null};
+    document.getElementById('picker-title').textContent='Pick from freezer';
+    document.getElementById('picker-search').value='';
+    buildPickerList('');
+    document.getElementById('picker-overlay').style.display='flex';
+    setTimeout(()=>document.getElementById('picker-search').focus(),100);
+  } else {
+    openPicker('assign-dish','any',null);
+    document.getElementById('picker-title').textContent='Pick a recipe';
+  }
+}
+
+function closePicker(){
+  document.getElementById('picker-overlay').style.display='none';
+  pickerTarget=null;
+}
+
+function filterPicker(){
+  buildPickerList(document.getElementById('picker-search').value);
+}
+
+function buildPickerList(search){
+  const s=search.toLowerCase();
+  const el=document.getElementById('picker-list');
+  let html='';
+  const mode=pickerTarget?pickerTarget.mode:'any';
+
+  if(mode==='fridge'){
+    const items=state.fridge.filter(x=>!s||x.dish.toLowerCase().includes(s));
+    if(!items.length){el.innerHTML='<p class="empty">Nothing in the fridge matching that.</p>';return;}
+    items.forEach(item=>{
+      const age=daysSince(item.date);
+      const le=lastEaten(item.dish);
+      const lc=lastCooked(item.dish);
+      html+=`<div class="picker-item" onclick="selectPickerItem('${esc(item.dish)}')">
+        <span class="pi-name">🥡 ${item.dish}</span>
+        <span class="pi-meta">${item.servings} srv · ${age}d old${le?' · last eaten '+daysSince(le)+'d ago':''}${lc?' · cooked '+daysSince(lc)+'d ago':''}</span>
+      </div>`;
+    });
+  } else if(mode==='freezer'){
+    const items=state.freezer.filter(x=>!s||x.dish.toLowerCase().includes(s));
+    if(!items.length){el.innerHTML='<p class="empty">Nothing in the freezer matching that.</p>';return;}
+    items.forEach(item=>{
+      const age=daysSince(item.frozenDate);
+      const le=lastEaten(item.dish);
+      html+=`<div class="picker-item" onclick="selectPickerItem('${esc(item.dish)}')">
+        <span class="pi-name">❄️ ${item.dish}</span>
+        <span class="pi-meta">${item.portions||1} portions · frozen ${age}d${le?' · last eaten '+daysSince(le)+'d ago':''}</span>
+      </div>`;
+    });
+  } else if(mode==='freetext'){
+    // Recipes + free text entry
+    if(s.length>1){
+      html+=`<div class="picker-item" style="background:#f0fff0" onclick="selectPickerItem('${esc(search)}')">
+        <span class="pi-name">✏️ Use: "${search}"</span>
+        <span class="pi-meta">free text entry</span>
+      </div>`;
+    }
+    const recipes=allRecipes().filter(r=>!s||rN(r).toLowerCase().includes(s));
+    const hf=recipes.filter(r=>rHF(r));
+    const rest=recipes.filter(r=>!rHF(r));
+    if(hf.length){
+      html+='<div class="picker-section-hdr">★ High Frequency</div>';
+      hf.forEach(r=>{html+=recipePickerItem(r,s);});
+    }
+    // Group rest by category alphabetically
+    const cats=[...new Set(rest.map(r=>rC(r)))].sort();
+    cats.forEach(cat=>{
+      const cr=rest.filter(r=>rC(r)===cat);
+      html+=`<div class="picker-section-hdr">${cat}</div>`;
+      cr.sort((a,b)=>rN(a).localeCompare(rN(b))).forEach(r=>{html+=recipePickerItem(r,s);});
+    });
+  } else {
+    // any — recipes only
+    const recipes=allRecipes().filter(r=>!s||rN(r).toLowerCase().includes(s));
+    const hf=recipes.filter(r=>rHF(r));
+    const rest=recipes.filter(r=>!rHF(r));
+    if(hf.length){
+      html+='<div class="picker-section-hdr">★ High Frequency</div>';
+      hf.forEach(r=>{html+=recipePickerItem(r,s);});
+    }
+    const cats=[...new Set(rest.map(r=>rC(r)))].sort();
+    cats.forEach(cat=>{
+      const cr=rest.filter(r=>rC(r)===cat);
+      html+=`<div class="picker-section-hdr">${cat}</div>`;
+      cr.sort((a,b)=>rN(a).localeCompare(rN(b))).forEach(r=>{html+=recipePickerItem(r,s);});
+    });
+  }
+  el.innerHTML=html||'<p class="empty">No matches.</p>';
+}
+
+function recipePickerItem(r,s){
+  const lc=lastCooked(rN(r));const le=lastEaten(rN(r));
+  const meta=(lc?'cooked '+daysSince(lc)+'d ago':'never cooked')+(le?' · eaten '+daysSince(le)+'d ago':', never eaten');
+  return`<div class="picker-item" onclick="selectPickerItem('${esc(rN(r))}')">
+    <span class="cat" style="background:${cc(rC(r))};flex-shrink:0">${rC(r)}</span>
+    <span class="pi-name">${rN(r)}</span>
+    <span class="pi-meta">${meta}</span>
+  </div>`;
+}
+
+function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+
+function selectPickerItem(name){
+  if(!pickerTarget)return;
+  document.getElementById(pickerTarget.fieldId).value=name;
+  const disp=document.getElementById(pickerTarget.displayId);
+  if(disp)disp.textContent=name;
+  closePicker();
+  if(pickerTarget&&pickerTarget.callback)pickerTarget.callback(name);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PLAN TAB
+// ═══════════════════════════════════════════════════════════════════════
+function shiftPlanStart(n){
+  state.planStartDate=addDaysToISO(state.planStartDate,n);
+  saveState();renderPlan();
+}
+
+function clearPlan(){
+  if(!confirm('Clear the entire meal plan?'))return;
+  state.mealPlan=[];state.shoppingList=null;saveState();renderPlan();
+}
+
+function renderPlan(){
+  const el=document.getElementById('plan-days');
+  const today=todayISO();
+  const days=getPlanDays();
+  el.innerHTML=days.map(date=>{
+    const entry=getPlanEntry(date);
+    const isToday=date===today;
+    const isPast=date<today;
+    let bodyHtml='';
+    if(entry){
+      const typeLabel={cook:'🍳 Cook fresh',fridge:'🥡 From fridge',freezer:'❄️ From freezer',out:'🍽 Eating out'}[entry.type]||entry.type;
+      const statusBadge=entry.status==='cooked'?'<span class="status-badge status-done">✓ Cooked</span>':'<span class="status-badge status-planned">Planned</span>';
+      bodyHtml=`<div class="day-slot">
+        <div style="flex:1">
+          <div class="slot-dish">${entry.dish||entry.note||'Eating out'}</div>
+          <div class="slot-meta">${typeLabel} ${statusBadge}</div>
+          ${entry.notes?'<div class="slot-meta">'+entry.notes+'</div>':''}
+        </div>
+      </div>
+      <div class="day-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openAssignDay('${date}')">✏️ Change</button>
+        <button class="btn btn-sm" style="background:#f0ebe2" onclick="removePlanEntry('${date}');renderPlan();renderCook();">✕ Remove</button>
+      </div>`;
+    } else {
+      bodyHtml=`<div class="day-empty">Nothing assigned</div>
+      <div class="day-actions">
+        <button class="btn btn-gold btn-sm" onclick="openAssignDay('${date}')">+ Assign</button>
+      </div>`;
+    }
+    return`<div class="day-card" style="${isPast?'opacity:.7':''}">
+      <div class="day-header">
+        <span class="day-label">${fmtDay(date)}${isToday?'<span class="day-today">Today</span>':''}</span>
+        <span class="day-date">${fmtDate(date)}</span>
+      </div>
+      <div class="day-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function openAssignDay(date){
+  document.getElementById('assign-date').value=date;
+  document.getElementById('assign-title').textContent='Assign — '+fmtDate(date);
+  document.getElementById('assign-dish').value='';
+  document.getElementById('assign-dish-display').textContent='Tap to pick…';
+  document.getElementById('assign-notes').value='';
+  document.getElementById('assign-out-note').value='';
+  // Reset type buttons to cook
+  document.querySelectorAll('#assign-type-btns .src-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('#assign-type-btns [data-src="cook"]').classList.add('active');
+  document.getElementById('assign-type').value='cook';
+  showAssignFields();
+  openModal('modal-assign');
+}
+
+function showAssignFields(){
+  const type=document.getElementById('assign-type').value;
+  document.getElementById('assign-dish-row').style.display=(type==='out')?'none':'block';
+  document.getElementById('assign-out-row').style.display=(type==='out')?'block':'none';
+}
+
+function saveAssign(){
+  const date=document.getElementById('assign-date').value;
+  const type=document.getElementById('assign-type').value;
+  const dish=document.getElementById('assign-dish').value.trim();
+  const note=document.getElementById('assign-out-note').value.trim();
+  const notes=document.getElementById('assign-notes').value.trim();
+  if(type!=='out'&&!dish)return;
+  const entry={id:uid(),date,type,dish:dish||'',note:note||'',notes,status:'planned'};
+  setPlanEntry(entry);
+  state.shoppingList=null;
+  closeModal('modal-assign');
+  renderPlan();renderCook();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// COOK TAB
+// ═══════════════════════════════════════════════════════════════════════
+function renderCook(){
+  const el=document.getElementById('cook-days');
+  const plan=(state.mealPlan||[]).filter(e=>e.dish||e.type==='out').sort((a,b)=>a.date.localeCompare(b.date));
+  if(!plan.length){el.innerHTML='<p class="empty">No meals planned yet. Add meals in the Plan tab.</p>';return;}
+  const today=todayISO();
+  el.innerHTML=plan.map(entry=>{
+    const r=findRecipe(entry.dish);
+    const driveUrl=r?rU(r):null;
+    const isPast=entry.date<today;
+    const isDone=entry.status==='cooked';
+    const typeLabel={cook:'🍳 Cook fresh',fridge:'🥡 From fridge',freezer:'❄️ From freezer',out:'🍽 Eating out'}[entry.type]||entry.type;
+    let actions='';
+    if(!isDone){
+      if(entry.type==='cook'){
+        actions+=`<button class="btn btn-green btn-sm" onclick="openMarkCooked('${entry.date}')">✓ Mark cooked</button>`;
+      } else if(entry.type==='fridge'||entry.type==='freezer'){
+        actions+=`<button class="btn btn-green btn-sm" onclick="markEaten('${entry.date}')">✓ Mark eaten</button>`;
+      } else if(entry.type==='out'){
+        actions+=`<button class="btn btn-green btn-sm" onclick="markEaten('${entry.date}')">✓ Mark done</button>`;
+      }
+    }
+    if(driveUrl)actions+=`<a href="${driveUrl}" target="_blank" class="btn btn-blue btn-sm">📄 Recipe</a>`;
+    // Shift buttons
+    actions+=`<button class="btn btn-ghost btn-sm" onclick="shiftEntry('${entry.date}',-1)">← Earlier</button>`;
+    actions+=`<button class="btn btn-ghost btn-sm" onclick="shiftEntry('${entry.date}',1)">Later →</button>`;
+    return`<div class="cook-day ${isDone?'status-cooked':''}">
+      <div class="cook-day-header">
+        <div>
+          <span style="font-size:13px;font-weight:bold">${fmtDay(entry.date)}</span>
+          <span style="font-size:11px;color:var(--muted);margin-left:6px">${fmtDate(entry.date)}</span>
+          ${entry.date===today?'<span class="day-today">Today</span>':''}
+        </div>
+        ${isDone?'<span class="status-badge status-done">✓ Done</span>':'<span class="status-badge status-planned">Planned</span>'}
+      </div>
+      <div class="cook-day-body">
+        <div class="cook-slot">
+          <div class="cs-info">
+            <div class="cs-dish">${entry.dish||entry.note||'Eating out'}</div>
+            <div class="cs-meta">${typeLabel}${entry.notes?' · '+entry.notes:''}</div>
+            <div class="cs-actions">${actions}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function shiftEntry(date,n){
+  const entry=getPlanEntry(date);if(!entry)return;
+  const newDate=addDaysToISO(date,n);
+  // Check if newDate is already taken
+  const existing=getPlanEntry(newDate);
+  if(existing&&!confirm('That day already has "'+( existing.dish||existing.note||'Eating out')+'" assigned. Swap them?'))return;
+  if(existing){
+    // Swap
+    const tmpDate=entry.date;
+    setPlanEntry({...entry,date:newDate});
+    setPlanEntry({...existing,date:tmpDate});
+  } else {
+    removePlanEntry(date);
+    setPlanEntry({...entry,date:newDate});
+  }
+  saveState();renderPlan();renderCook();
+}
+
+function openMarkCooked(date){
+  const entry=getPlanEntry(date);if(!entry)return;
+  document.getElementById('mc-date').value=date;
+  document.getElementById('mc-dish-label').textContent=entry.dish;
+  document.getElementById('mc-servings').value='4';
+  document.getElementById('mc-to-fridge').checked=true;
+  document.getElementById('mc-to-freezer').checked=false;
+  document.getElementById('mc-freeze-row').style.display='none';
+  document.getElementById('mc-notes').value='';
+  document.getElementById('modal-mark-cooked').style.display='flex';
+  // Wire up freeze toggle
+  document.getElementById('mc-to-freezer').onchange=function(){
+    document.getElementById('mc-freeze-row').style.display=this.checked?'block':'none';
+  };
+}
+
+function saveMarkCooked(){
+  const date=document.getElementById('mc-date').value;
+  const entry=getPlanEntry(date);if(!entry)return;
+  const servings=document.getElementById('mc-servings').value;
+  const notes=document.getElementById('mc-notes').value.trim();
+  const toFridge=document.getElementById('mc-to-fridge').checked;
+  const toFreezer=document.getElementById('mc-to-freezer').checked;
+  const freezePortions=parseInt(document.getElementById('mc-freeze-portions').value)||4;
+  // Mark plan entry as cooked
+  setPlanEntry({...entry,status:'cooked',cookedDate:date});
+  // Log to cooking log
+  state.cookingLog=(state.cookingLog||[]);
+  state.cookingLog.unshift({id:uid(),date,dish:entry.dish,servings,notes});
+  // Add to fridge
+  if(toFridge)state.fridge.unshift({id:uid(),dish:entry.dish,date,servings,notes:'From cooking'});
+  // Add to freezer
+  if(toFreezer)state.freezer.unshift({id:uid(),dish:entry.dish,frozenDate:date,portions:freezePortions,notes:'From cooking'});
+  // Log to dinner diary
+  state.dinnerDiary=(state.dinnerDiary||[]);
+  state.dinnerDiary.unshift({id:uid(),date,dish:entry.dish,source:'cook',notes});
+  saveState();
+  closeModal('modal-mark-cooked');
+  renderCook();renderFridge();renderFreezerList();updateBadges();renderAlerts();
+}
+
+function markEaten(date){
+  const entry=getPlanEntry(date);if(!entry)return;
+  const dish=entry.dish||entry.note||'Eating out';
+  // Log to diary
+  state.dinnerDiary=(state.dinnerDiary||[]);
+  state.dinnerDiary.unshift({id:uid(),date,dish,source:entry.type==='out'?'out':entry.type==='freezer'?'freezer':'fridge',notes:entry.notes||''});
+  // If from fridge, remove matching fridge item
+  if(entry.type==='fridge'){
+    const idx=state.fridge.findIndex(x=>x.dish.toLowerCase()===dish.toLowerCase());
+    if(idx>=0)state.fridge.splice(idx,1);
+  }
+  // If from freezer, decrement 1 portion
+  if(entry.type==='freezer'){
+    const fz=state.freezer.find(x=>x.dish.toLowerCase()===dish.toLowerCase());
+    if(fz){
+      fz.portions=(fz.portions||1)-1;
+      if(fz.portions<=0)state.freezer=state.freezer.filter(x=>x.id!==fz.id);
+    }
+  }
+  setPlanEntry({...entry,status:'cooked',cookedDate:date});
+  saveState();renderCook();renderFridge();renderFreezerList();updateBadges();renderAlerts();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SHOPPING
+// ═══════════════════════════════════════════════════════════════════════
+function renderShopping(){
+  const el=document.getElementById('shop-content');
+  const info=document.getElementById('shop-based-on');
+  const cookDays=(state.mealPlan||[]).filter(e=>e.type==='cook'&&e.dish);
+  if(!cookDays.length){el.innerHTML='<p class="empty">Assign cook-fresh meals in the Plan tab first.</p>';info.textContent='';return;}
+  if(!state.shoppingList)state.shoppingList=buildShoppingList();
+  const sl=state.shoppingList;
+  if(!sl){el.innerHTML='<p class="empty">No list generated.</p>';return;}
+  info.textContent='Shopping for: '+sl.generatedFor.join(', ');
+  const toBuy=sl.items.filter(x=>!x.checked&&!x.info);
+  const needed=sl.pantryItems.filter(x=>x.needed);
+  let html='';
+  if(!sl.items.length){html='<p class="empty">Nothing to buy!</p>';}
+  else{
+    SEC_ORDER.forEach(function(sec){
+      const si=sl.items.filter(x=>x.sec===sec);if(!si.length)return;
+      html+=`<div class="shop-section"><h3>${SEC_LABELS[sec]||sec} (${si.filter(x=>!x.checked).length})</h3>`;
+      si.forEach(function(item){
+        const i=sl.items.indexOf(item);
+        html+=`<div class="shop-item${item.checked?' checked':''}">
+          <input type="checkbox" ${item.checked?'checked':''} onchange="toggleBuy(${i})" ${item.info?'disabled':''}>
+          <label onclick="toggleBuy(${i})">${item.qty?'<span style="color:var(--muted);font-size:12px">'+item.qty+' </span>':''}${item.name}</label>
+          ${!item.info?'<button class="btn-del" style="font-size:13px" onclick="removeBuyItem('+i+')" title="Remove">✕</button>':''}
+        </div>`;
+      });
+      html+='</div>';
+    });
+  }
+  html+=`<div class="shop-section">
+    <button class="pantry-toggle" onclick="togglePantry()">🧂 Pantry &amp; spices (${sl.pantryItems.length} items — assumed you have) <span id="pantry-arrow">▼</span></button>
+    <p style="font-size:11px;color:var(--muted);margin:3px 0 6px">Tick any you're actually out of.</p>
+    <div id="pantry-section">`;
+  sl.pantryItems.forEach(function(item,i){
+    html+=`<div class="pantry-item${item.needed?' need':''}">
+      <input type="checkbox" ${item.needed?'checked':''} onchange="togglePantryItem(${i})">
+      <label onclick="togglePantryItem(${i})">${item.qty?'<span style="font-size:11px">'+item.qty+' </span>':''}${item.name}</label>
+      <button class="btn-del" style="font-size:12px;margin-left:auto" onclick="removePantryItem(${i})">✕</button>
+    </div>`;
+  });
+  html+='</div></div>';
+  const checked=sl.items.filter(x=>x.checked).length;
+  if(checked)html+=`<button class="btn btn-ghost" style="width:100%;margin-top:6px" onclick="clearChecked()">Clear ${checked} checked ✓</button>`;
+  if(sl.items.length||needed.length)html+=`<button class="btn btn-green" style="width:100%;margin-top:8px;padding:10px;font-size:14px" onclick="doneShopping()">✅ Done Shopping</button>`;
+  el.innerHTML=html;
+}
+
+function toggleBuy(i){if(!state.shoppingList)return;state.shoppingList.items[i].checked=!state.shoppingList.items[i].checked;saveState();renderShopping();}
+function removeBuyItem(i){if(!state.shoppingList)return;state.shoppingList.items.splice(i,1);saveState();renderShopping();}
+function togglePantryItem(i){if(!state.shoppingList)return;state.shoppingList.pantryItems[i].needed=!state.shoppingList.pantryItems[i].needed;saveState();renderShopping();}
+function removePantryItem(i){if(!state.shoppingList)return;state.shoppingList.pantryItems.splice(i,1);saveState();renderShopping();}
+function clearChecked(){if(!state.shoppingList)return;state.shoppingList.items=state.shoppingList.items.filter(x=>!x.checked);saveState();renderShopping();}
+function doneShopping(){
+  if(!confirm('Done shopping? This clears the shopping list only. Your meal plan stays intact.'))return;
+  state.shoppingList=null;saveState();renderShopping();
+  openTab('cook');
+}
+function togglePantry(){
+  const el=document.getElementById('pantry-section');const ar=document.getElementById('pantry-arrow');
+  if(!el)return;
+  if(el.style.display==='none'){el.style.display='block';ar.textContent='▼';}
+  else{el.style.display='none';ar.textContent='▶';}
+}
+function copyShoppingList(){
+  if(!state.shoppingList){alert('No shopping list yet.');return;}
+  const sl=state.shoppingList;
+  const needed=sl.pantryItems.filter(x=>x.needed);
+  const lines=[...sl.items.filter(x=>!x.checked).map(x=>'☐ '+(x.qty?x.qty+' ':'')+x.name),...needed.map(x=>'☐ [pantry] '+(x.qty?x.qty+' ':'')+x.name)];
+  if(!lines.length){alert('Nothing left to buy!');return;}
+  const text='🛒 Shopping List\n'+(sl.generatedFor?'('+sl.generatedFor.join(', ')+')\n':'')+'\n'+lines.join('\n');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>alert('Copied! Open Google Keep and paste (long-press → Paste, then tap Show Checkboxes to split into items).'));
+  } else {
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand('copy');alert('Copied! Open Google Keep and paste.');}
+    catch(e){alert('Could not auto-copy. Your list:\n\n'+text);}
+    document.body.removeChild(ta);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FRIDGE
+// ═══════════════════════════════════════════════════════════════════════
+function saveLeftover(){
+  const dish=document.getElementById('leftover-dish').value.trim();if(!dish)return;
+  state.fridge.unshift({id:uid(),dish,date:document.getElementById('lo-date').value,servings:document.getElementById('lo-servings').value,notes:document.getElementById('lo-notes').value.trim()});
+  saveState();
+  document.getElementById('leftover-dish').value='';document.getElementById('leftover-dish-display').textContent='Tap to pick a dish…';
+  document.getElementById('lo-notes').value='';
+  closeModal('modal-leftover');renderFridge();renderAlerts();updateBadges();
+}
+function renderFridge(){
+  const el=document.getElementById('fridge-list');
+  if(!state.fridge.length){el.innerHTML='<p class="empty">Fridge is empty.</p>';return;}
+  const sorted=[...state.fridge].sort((a,b)=>a.date<b.date?-1:1);
+  el.innerHTML=sorted.map(item=>{
+    const age=daysSince(item.date);const stale=age>3;
+    return`<div class="card" style="border-left:4px solid ${stale?'var(--red)':'var(--green)'}">
+      <div class="card-left">
+        <span class="lbl">${fmtDate(item.date)}${stale?' ⚠️':''}</span>
+        <span class="dish">${item.dish}</span>
+        ${item.notes?'<span class="notes">'+item.notes+'</span>':''}
+        <span class="notes" style="color:${stale?'var(--red)':'var(--muted)'}">${age===0?'Today':age+'d old'}</span>
+      </div>
+      <div class="card-right">
+        <span class="notes">👥 ${item.servings}</span>
+        <button class="btn btn-gold btn-sm" onclick="moveFridgeToFreezer('${item.id}')">→ Freeze</button>
+        <button class="btn btn-green btn-sm" onclick="eatFridge('${item.id}')">Eaten ✓</button>
+        <button class="btn btn-brown btn-sm" onclick="disposeFridge('${item.id}')">🗑 Toss</button>
+        <button class="btn-del" onclick="deleteFridge('${item.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function eatFridge(id){
+  const item=state.fridge.find(x=>x.id===id);if(!item)return;
+  state.dinnerDiary.unshift({id:uid(),date:todayISO(),dish:item.dish,source:'fridge',notes:'From fridge'});
+  state.fridge=state.fridge.filter(x=>x.id!==id);
+  saveState();renderFridge();renderAlerts();updateBadges();
+}
+function disposeFridge(id){
+  const item=state.fridge.find(x=>x.id===id);if(!item)return;
+  state.disposedLog.unshift({id:uid(),date:todayISO(),dish:item.dish,type:'fridge',notes:'Tossed'});
+  state.fridge=state.fridge.filter(x=>x.id!==id);
+  saveState();renderFridge();updateBadges();
+}
+function deleteFridge(id){state.fridge=state.fridge.filter(x=>x.id!==id);saveState();renderFridge();updateBadges();}
+function moveFridgeToFreezer(id){
+  const item=state.fridge.find(x=>x.id===id);if(!item)return;
+  state.freezer.unshift({id:uid(),dish:item.dish,frozenDate:todayISO(),portions:parseInt(item.servings)||1,notes:'From fridge'});
+  state.fridge=state.fridge.filter(x=>x.id!==id);
+  saveState();renderFridge();renderFreezerList();updateBadges();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FREEZER
+// ═══════════════════════════════════════════════════════════════════════
+function saveFreezer(){
+  const dish=document.getElementById('freezer-dish').value.trim();if(!dish)return;
+  state.freezer.unshift({id:uid(),dish,frozenDate:document.getElementById('fz-date').value,portions:parseInt(document.getElementById('fz-portions').value)||1,notes:document.getElementById('fz-notes').value.trim()});
+  saveState();
+  document.getElementById('freezer-dish').value='';document.getElementById('freezer-dish-display').textContent='Tap to pick a dish…';
+  document.getElementById('fz-notes').value='';
+  closeModal('modal-freezer');renderFreezerList();renderAlerts();updateBadges();
+}
+function renderFreezerList(){
+  const el=document.getElementById('freezer-list');
+  if(!state.freezer.length){el.innerHTML='<p class="empty">Freezer is empty.</p>';return;}
+  const sorted=[...state.freezer].sort((a,b)=>a.frozenDate<b.frozenDate?-1:1);
+  el.innerHTML=sorted.map(item=>{
+    const age=daysSince(item.frozenDate);const old=age>60,warn=age>30;
+    const col=old?'var(--red)':warn?'#e0b070':'var(--ice)';
+    const p=item.portions||1;
+    return`<div class="card" style="border-left:4px solid ${col}">
+      <div class="card-left">
+        <span class="lbl">Frozen ${fmtDate(item.frozenDate)}</span>
+        <span class="dish">${item.dish}</span>
+        ${item.notes?'<span class="notes">'+item.notes+'</span>':''}
+        <span class="notes" style="color:${old?'var(--red)':warn?'#a06000':'var(--muted)'}">${age}d in freezer ${old?'❄️⚠️ Use soon!':warn?'❄️ Getting old':'❄️ Fresh'}</span>
+      </div>
+      <div class="card-right">
+        <div class="portion-row">
+          <button class="portion-btn" onclick="adjPortions('${item.id}',-1)">−</button>
+          <span class="portion-count">${p}</span>
+          <button class="portion-btn" onclick="adjPortions('${item.id}',1)">+</button>
+          <span class="portion-label">portions</span>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="thawOne('${item.id}')">Thaw 1 →</button>
+        ${p>1?`<button class="btn btn-red btn-sm" onclick="thawAll('${item.id}')">Thaw all ${p}</button>`:''}
+        <button class="btn btn-brown btn-sm" onclick="disposeFreezer('${item.id}')">🗑 Toss</button>
+        <button class="btn-del" onclick="deleteFreezer('${item.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function adjPortions(id,d){
+  const item=state.freezer.find(x=>x.id===id);if(!item)return;
+  const np=(item.portions||1)+d;
+  if(np<=0){deleteFreezer(id);return;}
+  item.portions=np;saveState();renderFreezerList();updateBadges();
+}
+function thawOne(id){
+  const item=state.freezer.find(x=>x.id===id);if(!item)return;
+  state.fridge.unshift({id:uid(),dish:item.dish,date:todayISO(),servings:'1',notes:'Thawed from freezer (frozen '+fmtDate(item.frozenDate)+')'});
+  state.dinnerDiary.unshift({id:uid(),date:todayISO(),dish:item.dish,source:'freezer',notes:'Thawed from freezer'});
+  const np=(item.portions||1)-1;
+  if(np<=0)state.freezer=state.freezer.filter(x=>x.id!==id);else item.portions=np;
+  saveState();renderFreezerList();renderFridge();updateBadges();
+}
+function thawAll(id){
+  const item=state.freezer.find(x=>x.id===id);if(!item)return;
+  state.fridge.unshift({id:uid(),dish:item.dish,date:todayISO(),servings:String(item.portions||1),notes:'Thawed from freezer (frozen '+fmtDate(item.frozenDate)+')'});
+  state.freezer=state.freezer.filter(x=>x.id!==id);
+  saveState();renderFreezerList();renderFridge();updateBadges();
+}
+function deleteFreezer(id){state.freezer=state.freezer.filter(x=>x.id!==id);saveState();renderFreezerList();updateBadges();}
+function disposeFreezer(id){
+  const item=state.freezer.find(x=>x.id===id);if(!item)return;
+  state.disposedLog.unshift({id:uid(),date:todayISO(),dish:item.dish,type:'freezer',notes:'Tossed ('+(item.portions||1)+' portions, frozen '+fmtDate(item.frozenDate)+')'});
+  state.freezer=state.freezer.filter(x=>x.id!==id);
+  saveState();renderFreezerList();updateBadges();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DINNER DIARY
+// ═══════════════════════════════════════════════════════════════════════
+function saveDinner(){
+  const dish=document.getElementById('dinner-dish').value.trim();if(!dish)return;
+  state.dinnerDiary.unshift({id:uid(),date:document.getElementById('din-date').value,dish,source:document.getElementById('din-source').value,notes:document.getElementById('din-notes').value.trim()});
+  saveState();
+  document.getElementById('dinner-dish').value='';document.getElementById('dinner-dish-display').textContent='Tap to pick or type…';
+  document.getElementById('din-notes').value='';
+  document.querySelectorAll('#din-src-btns .src-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('#din-src-btns [data-src="cooked"]').classList.add('active');
+  document.getElementById('din-source').value='cooked';
+  closeModal('modal-dinner');renderDiary();
+}
+function deleteDinner(id){state.dinnerDiary=state.dinnerDiary.filter(x=>x.id!==id);saveState();renderDiary();}
+function renderDiary(){
+  const el=document.getElementById('diary-list');
+  const cutoff=addDaysToISO(todayISO(),-30);
+  const recent=(state.dinnerDiary||[]).filter(x=>x.date>=cutoff).sort((a,b)=>b.date.localeCompare(a.date));
+  const disposed=(state.disposedLog||[]).filter(x=>x.date>=cutoff);
+  const all=[...recent,...disposed.map(x=>({...x,_disposed:true}))];
+  if(!all.length){el.innerHTML='<p class="empty">No dinners recorded yet.</p>';return;}
+  const byDate={};
+  all.forEach(e=>{if(!byDate[e.date])byDate[e.date]=[];byDate[e.date].push(e);});
+  const dates=Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  el.innerHTML=dates.map(date=>{
+    const items=byDate[date];
+    return`<div class="diary-group">
+      <div class="diary-date-hdr">${fmtDate(date)}</div>
+      ${items.map(e=>e._disposed
+        ?`<div class="card" style="border-left:4px solid var(--brown);opacity:.65"><div class="card-left"><span class="dish">${e.dish}</span><span class="notes" style="color:var(--brown)">🗑 Tossed — ${e.notes||''}</span></div></div>`
+        :`<div class="card" style="border-left:4px solid var(--gold)"><div class="card-left"><span class="dish">${e.dish}</span><span class="notes">${SOURCE_LABEL[e.source]||e.source}${e.notes?' · '+e.notes:''}</span></div><button class="btn-del" onclick="deleteDinner('${e.id}')">✕</button></div>`
+      ).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// IDEAS / SUGGESTIONS
+// ═══════════════════════════════════════════════════════════════════════
+function renderIdeas(){
+  const el=document.getElementById('ideas-content');
+  const fz=state.freezer.map(x=>x.dish.toLowerCase());
+  const planned=(state.mealPlan||[]).map(x=>(x.dish||'').toLowerCase());
+  const recent=(state.cookingLog||[]).slice(0,14).map(x=>x.dish.toLowerCase());
+  const all=allRecipes();
+  const scored=all.filter(r=>!fz.includes(rN(r).toLowerCase())&&!planned.includes(rN(r).toLowerCase())).map(r=>{
+    const ri=recent.indexOf(rN(r).toLowerCase());
+    let score=rHF(r)?7:5;
+    if(ri===0)score-=8;else if(ri>0&&ri<4)score-=5;else if(ri>=4&&ri<8)score-=2;
+    score+=Math.random()*1.5;
+    return{...r,_score:score};
+  }).sort((a,b)=>b._score-a._score);
+  const byCat={};for(const r of scored){if(!byCat[rC(r)])byCat[rC(r)]=r;}
+  const varied=Object.values(byCat).slice(0,3);
+  const vn=new Set(varied.map(r=>rN(r)));
+  const top=scored.filter(r=>!vn.has(rN(r))).slice(0,3);
+  const sugg=[...varied,...top].slice(0,6);
+  let html='';
+  const staleFridge=state.fridge.filter(x=>daysSince(x.date)>3);
+  if(staleFridge.length){
+    html+='<div class="sugg-box"><h3>🥡 Getting old in the fridge</h3>';
+    staleFridge.forEach(l=>{html+='<div class="sugg-item">• <strong>'+l.dish+'</strong> <span style="color:var(--muted)">('+daysSince(l.date)+'d old, '+l.servings+' srv)</span></div>';});
+    html+='</div>';
+  }
+  const oldFz=state.freezer.filter(x=>daysSince(x.frozenDate)>60);
+  if(oldFz.length){
+    html+='<div class="sugg-box" style="background:#e8f4ff"><h3>❄️ Thaw from freezer (getting old)</h3>';
+    oldFz.slice(0,3).forEach(f=>{html+='<div class="sugg-item">• <strong>'+f.dish+'</strong> <span style="color:var(--muted)">(frozen '+daysSince(f.frozenDate)+'d · '+(f.portions||1)+' portions)</span></div>';});
+    html+='</div>';
+  }
+  html+='<div class="sugg-box"><h3>✨ Suggested dishes</h3>';
+  if(!sugg.length)html+='<p class="empty">No suggestions.</p>';
+  sugg.forEach(r=>{
+    const n=rN(r);const esc2=n.replace(/'/g,"\\'");
+    html+=`<div class="sugg-card">
+      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:5px">
+        <span class="cat" style="background:${cc(rC(r))}">${rC(r)}</span>
+        ${rHF(r)?'<span class="hf-badge">★ High Freq</span>':''}
+        <strong style="font-size:14px">${n}</strong>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-gold btn-sm" onclick="addToPlan('${esc2}')">+ Add to plan</button>
+        <button class="btn btn-ghost btn-sm" onclick="showRecipeDetail('${esc2}')">View recipe</button>
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  if(recent.length){
+    html+='<div class="sugg-box"><h3>📅 Recently cooked</h3>';
+    (state.cookingLog||[]).slice(0,7).forEach(e=>{html+='<div class="sugg-item">• '+e.dish+' <span style="color:var(--muted)">'+fmtDate(e.date)+'</span></div>';});
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+
+function addToPlan(name){
+  // Find first unassigned day in plan window
+  const days=getPlanDays();
+  const free=days.find(d=>!getPlanEntry(d));
+  if(free){
+    setPlanEntry({id:uid(),date:free,type:'cook',dish:name,note:'',notes:'',status:'planned'});
+    state.shoppingList=null;
+    alert('"'+name+'" added to '+fmtDate(free)+'. Go to 📅 Plan to review.');
+  } else {
+    alert('All days are assigned. Go to 📅 Plan to manage your schedule.');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RECIPES
+// ═══════════════════════════════════════════════════════════════════════
+let activeRecipeFilter='all';
+function renderRecipes(){
+  const all=allRecipes();
+  document.getElementById('recipe-count').textContent='('+all.length+')';
+  const cats=['all','high',...new Set(all.map(r=>rC(r)))];
+  document.getElementById('cat-filters').innerHTML=cats.map(c=>`<button class="filter-btn${activeRecipeFilter===c?' active':''}" onclick="setFilter('${c}')">${c==='all'?'All':c==='high'?'★ High Freq':c}</button>`).join('');
+  const search=document.getElementById('recipe-search').value.toLowerCase();
+  const filtered=all.filter(r=>{
+    const mc=activeRecipeFilter==='all'?true:activeRecipeFilter==='high'?rHF(r):rC(r)===activeRecipeFilter;
+    return mc&&(!search||rN(r).toLowerCase().includes(search));
+  });
+  document.getElementById('recipe-list-items').innerHTML=filtered.map(r=>{
+    const n=rN(r);const esc2=n.replace(/'/g,"\\'");
+    return`<div class="card" style="cursor:pointer;margin-bottom:7px" onclick="showRecipeDetail('${esc2}')">
+      <div class="card-left">
+        <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+          <span class="cat" style="background:${cc(rC(r))}">${rC(r)}</span>
+          ${rHF(r)?'<span class="hf-badge">★</span>':''}
+          ${r.custom?'<span class="custom-badge">custom</span>':''}
+          <span style="font-size:14px;font-weight:bold">${n}</span>
+        </div>
+        ${r.notes?'<span class="notes">'+r.notes+'</span>':''}
+      </div>
+      <div style="display:flex;gap:5px;align-items:center">
+        ${rU(r)?'<span title="In Google Drive" style="font-size:15px">☁️</span>':''}
+        <button class="btn btn-gold btn-sm" onclick="event.stopPropagation();addToPlan('${esc2}')">+Plan</button>
+      </div>
+    </div>`;
+  }).join('')||'<p class="empty">No recipes found.</p>';
+}
+function setFilter(f){activeRecipeFilter=f;renderRecipes();}
+
+function showRecipeDetail(name){
+  const r=findRecipe(name);if(!r)return;
+  document.getElementById('rd-name').textContent=rN(r);
+  document.getElementById('rd-meta').innerHTML=`<span class="cat" style="background:${cc(rC(r))}">${rC(r)}</span>${rHF(r)?'<span class="hf-badge">★ High Freq</span>':''}${r.custom?'<span class="custom-badge">custom</span>':''}`;
+  const ings=rI(r);
+  document.getElementById('rd-ingredients').innerHTML=ings.length
+    ?'<strong style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Ingredients</strong><div style="margin-top:6px">'+ings.map(i=>'<div style="font-size:13px;padding:3px 0;border-bottom:1px solid var(--border)">'+i+'</div>').join('')+'</div>'
+    :'<p style="font-size:13px;color:var(--muted)">Open in Drive for full ingredients.</p>';
+  document.getElementById('rd-notes').textContent=r.notes||'';
+  const esc2=rN(r).replace(/'/g,"\\'");
+  const actions=[];
+  if(rU(r))actions.push(`<a href="${rU(r)}" target="_blank" class="btn btn-blue">📄 Open in Drive</a>`);
+  actions.push(`<button class="btn btn-gold" onclick="addToPlan('${esc2}');closeModal('modal-recipe-detail')">+ Add to plan</button>`);
+  actions.push(`<button class="btn btn-ghost" onclick="openEditRecipe('${esc2}')">✏️ Edit</button>`);
+  document.getElementById('rd-actions').innerHTML=actions.join('');
+  openModal('modal-recipe-detail');
+}
+
+function openEditRecipe(name){
+  const r=findRecipe(name);if(!r)return;
+  closeModal('modal-recipe-detail');
+  document.getElementById('edit-recipe-id').value=r.id||('builtin::'+rN(r));
+  document.getElementById('edit-name').value=rN(r);
+  document.getElementById('edit-cat').value=rC(r);
+  document.getElementById('edit-hf').checked=rHF(r);
+  document.getElementById('edit-ingredients').value=rI(r).join('\n');
+  document.getElementById('edit-url').value=rU(r)||'';
+  document.getElementById('edit-notes').value=r.notes||'';
+  openModal('modal-edit-recipe');
+}
+function saveEditRecipe(){
+  const id=document.getElementById('edit-recipe-id').value;
+  const updated={id:id.startsWith('builtin::')?uid():id,name:document.getElementById('edit-name').value.trim(),category:document.getElementById('edit-cat').value,highFreq:document.getElementById('edit-hf').checked,ingredients:document.getElementById('edit-ingredients').value.split('\n').map(s=>s.trim()).filter(Boolean),driveUrl:document.getElementById('edit-url').value.trim()||null,notes:document.getElementById('edit-notes').value.trim(),custom:true};
+  if(!updated.name)return;
+  state.customRecipes=(state.customRecipes||[]).filter(x=>x.id!==id);
+  state.customRecipes.unshift(updated);
+  saveState();closeModal('modal-edit-recipe');renderRecipes();
+}
+function deleteRecipe(id){
+  if(!confirm('Hide this recipe? It will no longer appear.'))return;
+  state.customRecipes=(state.customRecipes||[]).filter(x=>x.id!==id);
+  const editName=document.getElementById('edit-name').value.trim();
+  if(editName){if(!state.deletedRecipes)state.deletedRecipes=[];if(!state.deletedRecipes.includes(editName))state.deletedRecipes.push(editName);}
+  saveState();closeModal('modal-edit-recipe');renderRecipes();
+}
+function saveCustomRecipe(){
+  const name=document.getElementById('nr-name').value.trim();if(!name)return;
+  (state.customRecipes=state.customRecipes||[]).unshift({id:uid(),name,category:document.getElementById('nr-cat').value,highFreq:document.getElementById('nr-hf').checked,ingredients:document.getElementById('nr-ingredients').value.split('\n').map(s=>s.trim()).filter(Boolean),driveUrl:document.getElementById('nr-url').value.trim()||null,notes:document.getElementById('nr-notes').value.trim(),custom:true});
+  saveState();
+  ['nr-name','nr-ingredients','nr-url','nr-notes'].forEach(id=>document.getElementById(id).value='');
+  closeModal('modal-add-recipe');renderRecipes();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ALERTS & BADGES
+// ═══════════════════════════════════════════════════════════════════════
+function renderAlerts(){
+  const el=document.getElementById('alerts-area');
+  const a=[];
+  (state.freezer||[]).filter(x=>daysSince(x.frozenDate)>60).forEach(item=>{
+    a.push('<div class="alert alert-warn">❄️ <strong>'+item.dish+'</strong> frozen '+daysSince(item.frozenDate)+'d ago — '+(item.portions||1)+' portions left <button onclick="thawOne(\''+item.id+'\')">Thaw 1</button></div>');
+  });
+  (state.fridge||[]).filter(x=>daysSince(x.date)>3).forEach(item=>{
+    a.push('<div class="alert alert-red">⚠️ <strong>'+item.dish+'</strong> in fridge '+daysSince(item.date)+'d — eat or toss <button onclick="eatFridge(\''+item.id+'\')">Eaten ✓</button></div>');
+  });
+  el.innerHTML=a.length?'<div class="alerts">'+a.join('')+'</div>':'';
+}
+function updateBadges(){
+  const fb=document.getElementById('fridge-badge');
+  const fzb=document.getElementById('freezer-badge');
+  if(state.fridge&&state.fridge.length){fb.textContent=state.fridge.length;fb.style.display='inline';}else fb.style.display='none';
+  if(state.freezer&&state.freezer.length){fzb.textContent=state.freezer.length;fzb.style.display='inline';}else fzb.style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DATA MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='kitchen-planner-backup-'+todayISO()+'.json';a.click();
+}
+function importData(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const imp=JSON.parse(e.target.result);
+      if(confirm('This will replace all current data. Continue?')){
+        state=Object.assign({mealPlan:[],planStartDate:todayISO(),fridge:[],freezer:[],dinnerDiary:[],disposedLog:[],cookingLog:[],customRecipes:[],shoppingList:null,deletedRecipes:[]},imp);
+        if(!state.deletedRecipes)state.deletedRecipes=[];
+        DEFAULT_HIDDEN.forEach(n=>{if(!state.deletedRecipes.includes(n))state.deletedRecipes.push(n);});
+        saveState();init();alert('Data imported successfully!');
+      }
+    }catch(err){alert('Error reading file. Make sure it is a valid backup JSON.');}
+  };
+  reader.readAsText(file);
+}
+function clearData(){
+  if(confirm('Clear all tracking data? Custom recipes are kept.')){
+    state.mealPlan=[];state.planStartDate=todayISO();state.fridge=[];state.freezer=[];
+    state.dinnerDiary=[];state.disposedLog=[];state.cookingLog=[];state.shoppingList=null;
+    saveState();init();alert('Tracking data cleared.');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════
+function init(){
+  document.getElementById('today-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  renderAlerts();updateBadges();
+  openTab('plan');
+}
+
+loadState();
+init();
+</script>
+</body>
+</html>
